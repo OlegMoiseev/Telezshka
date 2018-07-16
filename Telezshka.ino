@@ -1,17 +1,15 @@
 #include <Array.h>
-#include "U8glib.h"
+#include <TimerOne.h>
 
+#define mosfet 10
+#define reverse 8
 
-int pinY = 10;
-int pinSensor = 5;
-int PTP1 = A1;
-int PTP2 = A2;
-int PTP3 = A3;
-double eps = 1.0, a1 = 0.0, a2 = 0.0, a3 = 0.0;
+const double koef = 94 / 75;
+int ptp1 = A1;
+int ptp2 = A2;
+int ptp3 = A3;
+const double eps = 1.0;
 Array<double, 6> xyz;
-
-//display init
-U8GLIB_SH1106_128X64 u8g(U8G_I2C_OPT_DEV_0|U8G_I2C_OPT_FAST);
 
 class Data
 {
@@ -29,7 +27,6 @@ class Data
     int initSerial();
     int moveHome();
     int movePoint();
-    //void draw(void);
 };
 
 Data::Data()
@@ -45,130 +42,84 @@ int Data::initSerial()
 
 int moveHome()
 {
-  moveToAngle(165.0, eps, PTP1);
+  moveToAngle(165.0, eps, ptp1);
 }
 
-void draw(void)
+void setup()
 {
-  u8g.setFont(u8g_font_5x8);
-  u8g.setPrintPos(42, 10); u8g.print("|");
-  u8g.setPrintPos(42, 20); u8g.print("|");
-  u8g.setPrintPos(42, 30); u8g.print("|");
-  u8g.setPrintPos(42, 40); u8g.print("|");
-  u8g.setPrintPos(42, 50); u8g.print("|");
-  u8g.setPrintPos(42, 60); u8g.print("|");
-  u8g.setPrintPos(84, 10); u8g.print("|");
-  u8g.setPrintPos(84, 20); u8g.print("|");
-  u8g.setPrintPos(84, 30); u8g.print("|");
-  u8g.setPrintPos(84, 40); u8g.print("|");
-  u8g.setPrintPos(84, 50); u8g.print("|");
-  u8g.setPrintPos(84, 60); u8g.print("|");
-  //speed
-  u8g.setPrintPos(10, 10); u8g.print("U1");
-  u8g.setPrintPos(10, 20); u8g.print(xyz[1]);
-  u8g.setPrintPos(10, 30); u8g.print("0");
-
-  u8g.setPrintPos(50, 10); u8g.print("U2");
-  u8g.setPrintPos(50, 20); u8g.print(xyz[3]);
-  u8g.setPrintPos(50, 30); u8g.print("0");
-
-  u8g.setPrintPos(90, 10); u8g.print("U3");
-  u8g.setPrintPos(90, 20); u8g.print(xyz[5]);
-  u8g.setPrintPos(90, 30); u8g.print("0");
-  //degrees
-  u8g.setPrintPos(10, 40); u8g.print("G1");
-  u8g.setPrintPos(10, 50); u8g.print(xyz[0]);
-  u8g.setPrintPos(10, 60); u8g.print(AngleNow1());
-
-  u8g.setPrintPos(50, 40); u8g.print("G2");
-  u8g.setPrintPos(50, 50); u8g.print(xyz[2]);
-  u8g.setPrintPos(50, 60); u8g.print(AngleNow2());
-
-  u8g.setPrintPos(90, 40); u8g.print("G3");
-  u8g.setPrintPos(90, 50); u8g.print(xyz[4]);
-  u8g.setPrintPos(90, 60); u8g.print(AngleNow3());
-}
-
-void setup() {
-  //display setup
-  if (u8g.getMode() == U8G_MODE_R3G3B2)
-  {
-    u8g.setColorIndex(255);     // white
-  }
-  else if (u8g.getMode() == U8G_MODE_GRAY2BIT)
-  {
-    u8g.setColorIndex(3);         // max intensity
-  }
-  else if (u8g.getMode() == U8G_MODE_BW)
-  {
-    u8g.setColorIndex(1);         // pixel on
-  }
-  else if (u8g.getMode() == U8G_MODE_HICOLOR)
-  {
-    u8g.setHiColorByRGB(255,255,255);
-  }
-  //--
-  
   Serial.begin(9600);
-  pinMode(pinY, OUTPUT);
-  pinMode(pinSensor, OUTPUT);
+  
+  Timer1.initialize(100);
+  pinMode(mosfet, OUTPUT);
+  pinMode(reverse, OUTPUT);
+
   moveHome();
 }
 
-void stopMove() {
+void stopMove()
+{
   Serial.println("Остановка");
-  analogWrite(pinY, 0);
+  Timer1.pwm(mosfet, 0);
 }
 
 double AngleNow1()
 {
-  return analogRead(PTP1) * 330.0 / 1024.0;
+  return analogRead(ptp1) * 330.0 / 1024.0;
 }
 
 double AngleNow2()
 {
-  return analogRead(PTP2) * 330.0 / 1024.0;
+  return analogRead(ptp2) * 330.0 / 1024.0;
 }
 
 double AngleNow3()
 {
-  return 3300.0 * ((5.0 / ((analogRead(PTP3) * 5.0) / 1024.0) ) - 1)  * 330.0 / 6300.0;
+  return 3300.0 * ((5.0 / ((analogRead(ptp3) * 5.0) / 1024.0) ) - 1)  * 330.0 / 6300.0;
 }
 
 void rollClockwise()
 {
-  digitalWrite(pinSensor, HIGH);
+  digitalWrite(reverse, HIGH);
 }
 
 void rollCounterClock()
 {
-  digitalWrite(pinSensor, LOW);
+  digitalWrite(reverse, LOW);
 }
 
 void standAngle(double degFinish, double epsilon, bool side, int numPTP)
-{//Oleg
-  int spd = 255;
-  while (abs(degFinish - AngleNow(numPTP)) > epsilon){
-      
-    side ? rollClockwise() : rollCounterClock();
+{
+  double eps1 = 10.0;
+  int spd;
   
-    while (abs(degFinish - AngleNow(numPTP)) > epsilon)
+  (abs(degFinish - AngleNow(numPTP)) > eps1) ? spd = 1023 : spd = 512;
+  
+  while (abs(degFinish - AngleNow(numPTP)) > epsilon)
+  {
+    side ? rollClockwise() : rollCounterClock();
+    
+    while (abs(degFinish - AngleNow(numPTP)) > eps1)
     {
-      analogWrite(pinY, 40);
-      Serial.print("num = ");
-      Serial.print(numPTP);
-      Serial.print(" angle = ");
+      Timer1.pwm(mosfet, spd);
+      Serial.print("Angle = ");
       Serial.println(AngleNow(numPTP));
-
-      
     }
-    delay(100);
+    if (eps1 > 2)
+    {
+      eps1 /= 2;
+    }
+    if (spd > 512)
+    {
+      spd /= 2;
+    }
     side = not side;
-    spd = spd / 2;
+
     Serial.println("++++++++++++++++++++");
   }
   stopMove();
 }
+//180.0 0.0 0.0 0.0 0.0 0.0
+
 
 double AngleNow(int numPTP)
 {
@@ -182,9 +133,10 @@ double AngleNow(int numPTP)
 
 
 void moveToAngle(double degFinish, double epsilon, int numPTP)
-{ 
+{
+  degFinish *= koef;
   if ((degFinish <= 330) && (degFinish >= 0))
-  { 
+  {
     if (degFinish < AngleNow(numPTP))
     {
       standAngle(degFinish, epsilon, true, numPTP);
@@ -196,15 +148,15 @@ void moveToAngle(double degFinish, double epsilon, int numPTP)
   }
 }
 
-void moveWheel(double sped)
-{
-  analogWrite(pinY, sped * 2.55);
-}
+//void moveWheel(double sped)
+//{
+//  analogWrite(pinY, sped * 2.55);
+//}
 
 
 void moveTelejka(Array<double, 6> &xyz)
 {
-  moveToAngle(xyz[0], eps, PTP1);
+  moveToAngle(xyz[0], eps, ptp1);
   //moveWheel(xyz[1]);
   // moveToAngle(xyz[2], eps, PTP2);
   //moveWheel(xyz[3], PTP2);
@@ -214,13 +166,7 @@ void moveTelejka(Array<double, 6> &xyz)
 }
 
 void loop()
-{ 
-//  u8g.firstPage();
-//  do
-//  {
-//    draw();
-//  } while (u8g.nextPage());
-
+{
   if (Serial.available() > 0)
   {
     for (int i = 0; i < 6; ++i)
