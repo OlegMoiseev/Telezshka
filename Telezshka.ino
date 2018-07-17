@@ -1,4 +1,5 @@
 #include <Array.h>
+//#include <PID_v1.h>
 
 #define mosfet 10
 #define reverse 8
@@ -9,6 +10,12 @@ int ptp2 = A2;
 int ptp3 = A3;
 const double eps = 1.0;
 Array<double, 6> xyz;
+
+
+double Setpoint, Input, Output;
+ 
+//PID myPID(&Input, &Output, &Setpoint, 1, 4, 3, DIRECT);
+
 
 class Data
 {
@@ -41,7 +48,7 @@ int Data::initSerial()
 
 int moveHome()
 {
-  moveToAngle(165.0, eps, ptp1);
+  moveToAngle(165.0, ptp1);
 }
 
 void setup()
@@ -84,33 +91,48 @@ void rollCounterClock()
   digitalWrite(reverse, LOW);
 }
 
-void standAngle(double degFinish, double epsilon, bool side, int numPTP)
+
+
+void setRotSpeed(double spd)
 {
-  double eps1 = 10.0;
-  int spd;
-  (abs(degFinish - AngleNow(numPTP)) > eps1) ? spd = 255 : spd = 128;
+  spd > 0 ? rollClockwise() : rollCounterClock();
+  Serial.print("Send: ");
+  Serial.print(spd);
+  Serial.print(" ");
+
+  analogWrite(mosfet, abs(spd));  
+}
+
+void standAngle(double degFinish, int numPTP)
+{
+  double epsilon = 1.0;
+  double spd;
+  double k = 255. / 330.;
+
   while (abs(degFinish - AngleNow(numPTP)) > epsilon)
   {
-    side ? rollClockwise() : rollCounterClock();
+    double nowA = AngleNow(numPTP);
     
-    while (abs(degFinish - AngleNow(numPTP)) > eps1)
+    double delta = nowA - degFinish;
+
+    if (abs(delta) < 16)
     {
-      analogWrite(mosfet, spd);
-      Serial.print("Angle = ");
-      Serial.println(AngleNow(numPTP));
+      delta > epsilon ? spd = 16 : spd = -16;
+
     }
-    if (eps1 > 2)
+    else
     {
-      eps1 /= 2;
+      spd = delta * k;
     }
-    if (spd > 16)
-    {
-      spd /= 2;
-    }
-    side = not side;
-    delay(100);
-    Serial.println("++++++++++++++++++++");
+    setRotSpeed(spd);
+    
+    Serial.print(nowA);
+    Serial.print(' ');
+    Serial.println(spd);
   }
+  Serial.println("EXITED");
+  Serial.println(degFinish - AngleNow(numPTP));
+  
   stopMove();
 }
 //180.0 0.0 0.0 0.0 0.0 0.0
@@ -127,31 +149,19 @@ double AngleNow(int numPTP)
 }
 
 
-void moveToAngle(double degFinish, double epsilon, int numPTP)
+void moveToAngle(double degFinish, int numPTP)
 {
   degFinish *= koef;
   if ((degFinish <= 330) && (degFinish >= 0))
   {
-    if (degFinish < AngleNow(numPTP))
-    {
-      standAngle(degFinish, epsilon, true, numPTP);
-    }
-    else
-    {
-      standAngle(degFinish, epsilon, false, numPTP);
-    }
+    standAngle(degFinish, numPTP);
   }
 }
-
-//void moveWheel(double sped)
-//{
-//  analogWrite(pinY, sped * 2.55);
-//}
 
 
 void moveTelejka(Array<double, 6> &xyz)
 {
-  moveToAngle(xyz[0], eps, ptp1);
+  moveToAngle(xyz[0], ptp1);
   //moveWheel(xyz[1]);
   // moveToAngle(xyz[2], eps, PTP2);
   //moveWheel(xyz[3], PTP2);
