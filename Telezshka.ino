@@ -1,5 +1,4 @@
 #include <Array.h>
-#include <TimerOne.h>
 
 #define mosfet 10
 #define reverse 8
@@ -48,8 +47,6 @@ int moveHome()
 void setup()
 {
   Serial.begin(9600);
-  
-  Timer1.initialize(100);
   pinMode(mosfet, OUTPUT);
   pinMode(reverse, OUTPUT);
 
@@ -59,7 +56,7 @@ void setup()
 void stopMove()
 {
   Serial.println("Остановка");
-  Timer1.pwm(mosfet, 0);
+  analogWrite(mosfet, 0);
 }
 
 double AngleNow1()
@@ -91,16 +88,14 @@ void standAngle(double degFinish, double epsilon, bool side, int numPTP)
 {
   double eps1 = 10.0;
   int spd;
-  
-  (abs(degFinish - AngleNow(numPTP)) > eps1) ? spd = 1023 : spd = 512;
-  
+  (abs(degFinish - AngleNow(numPTP)) > eps1) ? spd = 255 : spd = 128;
   while (abs(degFinish - AngleNow(numPTP)) > epsilon)
   {
     side ? rollClockwise() : rollCounterClock();
     
     while (abs(degFinish - AngleNow(numPTP)) > eps1)
     {
-      Timer1.pwm(mosfet, spd);
+      analogWrite(mosfet, spd);
       Serial.print("Angle = ");
       Serial.println(AngleNow(numPTP));
     }
@@ -108,12 +103,12 @@ void standAngle(double degFinish, double epsilon, bool side, int numPTP)
     {
       eps1 /= 2;
     }
-    if (spd > 512)
+    if (spd > 16)
     {
       spd /= 2;
     }
     side = not side;
-
+    delay(100);
     Serial.println("++++++++++++++++++++");
   }
   stopMove();
