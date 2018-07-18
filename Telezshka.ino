@@ -108,32 +108,44 @@ void standAngle(double degFinish, int numPTP)
   double epsilon = 1.0;
   double spd;
   double k = 255. / 330.;
-
-  while (abs(degFinish - AngleNow(numPTP)) > epsilon)
+  //double k = 1;
+  double minDelta = 45;
+  double prevSpd = 0;
+  do
   {
-    double nowA = AngleNow(numPTP);
-    
-    double delta = nowA - degFinish;
-
-    if (abs(delta) < 16)
+    do
     {
-      delta > epsilon ? spd = 16 : spd = -16;
+      double nowA = AngleNow(numPTP);
+      
+      double delta = nowA - degFinish;
+  
+      if (abs(delta) < minDelta)
+      {
+        delta > 0 ? spd = minDelta * k : spd = -minDelta * k;
+  
+      }
+      else
+      {
+        spd = delta * k;
+      }
 
+      setRotSpeed(spd);
+
+      Serial.print("Angle now: ");
+      Serial.print(nowA);
+      Serial.print(" Speed: ");
+      Serial.println(spd);
     }
-    else
-    {
-      spd = delta * k;
-    }
-    setRotSpeed(spd);
-    
-    Serial.print(nowA);
-    Serial.print(' ');
-    Serial.println(spd);
+    while (abs(degFinish - AngleNow(numPTP)) > epsilon);
+    delay(10);
   }
+  while (abs(degFinish - AngleNow(numPTP)) > epsilon);
+  stopMove();
+
+  Serial.println(abs(degFinish - AngleNow(numPTP)) > epsilon);
   Serial.println("EXITED");
   Serial.println(degFinish - AngleNow(numPTP));
   
-  stopMove();
 }
 //180.0 0.0 0.0 0.0 0.0 0.0
 
@@ -174,11 +186,11 @@ void loop()
 {
   if (Serial.available() > 0)
   {
-    for (int i = 0; i < 6; ++i)
-    {
-      xyz.at(i) = Serial.parseFloat();
-      Serial.println(xyz.at(i));
-    }
-    moveTelejka(xyz);
+      for (int i = 0; i < 6; ++i)
+      {
+        xyz.at(i) = Serial.parseFloat();
+        Serial.println(xyz.at(i));
+      }
+      moveTelejka(xyz);
   }
 }
