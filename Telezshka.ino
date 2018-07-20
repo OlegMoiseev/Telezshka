@@ -60,7 +60,8 @@ wheel::wheel(int pot, int mS, int mR)
   motorReverseTurnPin(mR),
   turnEps(1.0),
   angle(165.0),
-  koefPID(255. / 330.)
+  //koefPID(255. / 330.)
+  koefPID(1.4)
 {
 }
 
@@ -91,7 +92,7 @@ int wheel::moveToAngle()
 int wheel::standAngle()
 {
   double spd;
-  double minDelta = 45;
+  double minDelta = 30;
   
   if (abs(angle - angleNow()) > turnEps)
   {
