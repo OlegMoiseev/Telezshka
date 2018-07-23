@@ -20,37 +20,36 @@
     }
 }
 
-void standSpeed()
+void standspd()
 {
-  double delta = Speedwh - Speed_now;
-  if (abs(delta) > eps)
+  double delta = spd - speedNow;
+  if (abs(delta > eps)
   {
-    setRollSpeed(delta);
+    double new_spd = pin_spd + (abs((255 / max_spd) * delta)) / koefPIDspd
+    if (new_spd >= 255)
+    {
+      pin_spd = 255;
+    }
+    else
+    {
+      pin_spd = new_spd;
+    }
+    setRollspd(pin_spd);
   }
 }
 
 void moveWheel()
 {
-  if (Speedwh >= -715.0 && Speedwh <= 715.0)
+  if (spdwh >= -715.0 && spdwh <= 715.0)
   {
-    standSpeed();
+    standspd();
   }
 }
 
-void setRollSpeed(double Speed)
+void setRollspd(double spd)
 {
-  Speed > 0 ? rollClockwise(whReverse) : rollCounterClock(whReverse);
-  double new_Speed = pin_Speed + (abs((255 / max_Speed) * Speed)) / koefPIDSpeed;
-  if (new_Speed >= 255)
-  {
-    analogWrite(whMosfet, 255);
-    pin_Speed = 255;
-  }
-  else
-  {
-    analogWrite(whMosfet, new_Speed);
-    pin_Speed = new_Speed;
-  }
+  spd > 0 ? rollClockwise(whReverse) : rollCounterClock(whReverse);
+  analogWrite(motorRollspdPin, spd);
 }*/
 
 
@@ -71,117 +70,87 @@ const int potent1 = A1;
 const int potent2 = A2;
 const int potent3 = A3;
 
-const int motorTurnSpeed1 = 2;
-const int motorTurnSpeed2 = 3;
-const int motorTurnSpeed3 = 4;
+const int motorTurnspd1 = 2;
+const int motorTurnspd2 = 3;
+const int motorTurnspd3 = 4;
 
 const int motorTurnReverse1 = 22;
 const int motorTurnReverse2 = 23;
 const int motorTurnReverse3 = 24;
 
 const int opto1 = 8;
-const int motorSpeedSpeed1 = 9;
-const int motorSpeedReverse1 = 7;
+const int motorSpdSpd1 = 9;
+const int motorSpdReverse1 = 7;
 
 class wheel
 {
     const int potentPin;
-    const int motorTurnSpeedPin;
+    const int motorTurnspdPin;
     const int motorTurnReversePin;
 
     const int optoPin;
-    const int motorRollSpeedPin;
+    const int motorRollspdPin;
     const int motorRollReversePin;
     
     const double turnEps;
     const double koefPID;
-
-    double angle;
-    double Speed;
-    double speedNow;
-    double epsSpeed;
-    double sendSpeed;
-    
+ 
     
     int stopTurn();
     /*TODO: Realize it!
       int stopMove();
     */
     int standAngle();
-    int setTurnSpeed(double Speed);
-    int setRollSpeed(double Speed);
+    int setTurnspd(double spd);
+
     int rollClockwise();
     int rollCounterClock();
     
     int rollForward();
     int rollBackward();
-
     
-
     double angleNow();
 
     bool prevState;
     unsigned long prevTime;
 
   public:
+    double sendSpd;
+    double desiredSpd;
+    double currentSpd;
+    
     wheel(int pot, int mS, int mR, int opto, int mRSP, int mRR);
-    int initialize();
-    int moveToAngle();
-    int setSpd(double SpeedIn);
-    void setAngle(double angleIn);
-    double getCurRollSpeed();
-    int updateRoll();
-    double curRollSpeed;
-    void updateCurrentSpeed(double Speed_n);
+    int setSpd(double spdIn);
+    void updateCurRollSpd();
+    int setRollSpd();
 };
 
 wheel::wheel(int pot, int mS, int mR, int opto, int mRS, int mRR)
   :
   potentPin(pot),
-  motorTurnSpeedPin(mS),
+  motorTurnspdPin(mS),
   motorTurnReversePin(mR),
   optoPin(opto),
-  motorRollSpeedPin(mRS),
+  motorRollspdPin(mRS),
   motorRollReversePin(mRR),
   turnEps(1.0),
-  angle(165.0),
   //koefPID(255. / 330.)
   koefPID(1.4),
   prevTime(micros()),
-  sendSpeed(0),
-  speedNow(0),
-  curRollSpeed(0)
+  sendSpd(0),
+  currentSpd(0),
+  desiredSpd(0)
 {
-  pinMode(motorTurnSpeedPin, OUTPUT);
+  pinMode(motorTurnspdPin, OUTPUT);
   pinMode(motorTurnReversePin, OUTPUT);
   pinMode(potentPin, INPUT);
   pinMode(optoPin, INPUT);
-  pinMode(motorRollSpeedPin, OUTPUT);
+  pinMode(motorRollspdPin, OUTPUT);
   pinMode(motorRollReversePin, OUTPUT);
   
   prevState = digitalRead(optoPin);
 }
 
-void wheel::updateCurrentSpeed(double Speed_n)
-{
-  speedNow = Speed_n;
-}
-
-int wheel::setRollSpeed(double SpeedVal)
-{
-  SpeedVal > 0 ? rollForward() : rollBackward();
-  double Speed = abs(SpeedVal);
-  if (Speed > 255)
-  {
-    analogWrite(motorRollSpeedPin, 255);
-    sendSpeed = 255;
-  }
-  else
-  {
-    analogWrite(motorRollSpeedPin, Speed);
-    sendSpeed = Speed;
-  }
-}
 
 int wheel::rollBackward()
 {
@@ -193,66 +162,72 @@ int wheel::rollForward()
   digitalWrite(motorRollReversePin, LOW);
 }
 
-double wheel::getCurRollSpeed()
+void wheel::updateCurRollSpd()
 {
   bool curState = digitalRead(optoPin);
   if (curState != prevState)
   {
     unsigned long stepTime = micros() - prevTime;
+    
     prevState = curState;
     prevTime = micros();
-    
     curState == true ? stepTime *= 1.382239382 : stepTime *= 0.7306122449;
     static_cast<double>(stepTime);
-    
-    speedNow = 5. / (stepTime / 1e6);  // 5 mm / (time in microseconds / 1 000 000);
-    return speedNow;
-  }
-  else
-  {
-    return 0;
+    currentSpd = 5. / (stepTime / 1e6);  // 5 mm / (time in microseconds / 1 000 000);
   }
 }
 
-int wheel::setSpd(double speedIn)
+int wheel::setSpd(double spdIn)
 {
-  Speed = speedIn;
+  desiredSpd = spdIn;
 }
 
-int wheel::updateRoll()
+int wheel::setRollSpd()
 {
-  double delta = (Speed - speedNow);
-  if (abs(delta) > epsSpeed)
+  updateCurRollSpd();
+  desiredSpd > 0 ? rollForward() : rollBackward();
+  double delta = abs(desiredSpd) - currentSpd;
+  if (abs(delta) > 10.0)
   {
-    setRollSpeed(delta);
+    sendSpd += (255.0 / 200.0) * delta / 100.0;  // 200 - maxSpeed 2.0 - koef PID 
+    if (sendSpd > 255)
+    {
+      sendSpd = 255;
+    }
+    if (sendSpd < 0)
+    {
+      sendSpd = 50;
+    }
+    analogWrite(motorSpdSpd1, sendSpd);
   }
+  Serial.print("Current speed:\t");
+  Serial.print(currentSpd);
+  Serial.print("\tDesired speed:\t");
+  Serial.print(desiredSpd);
+  Serial.print("\tDelta:\t");
+  Serial.print(delta);
+  Serial.print("\tSend speed:\t");
+  Serial.println(sendSpd);
+  
+  analogWrite(motorRollspdPin, sendSpd);
 }
 
-wheel wheel1(potent1, motorTurnSpeed1, motorTurnReverse1, opto1, motorSpeedSpeed1, motorSpeedReverse1);
-//wheel wheel2(potent2, motorTurnSpeed2, motorTurnReverse2);
-//wheel wheel3(potent3, motorTurnSpeed3, motorTurnReverse3);
+
+wheel wheel1(potent1, motorTurnspd1, motorTurnReverse1, opto1, motorSpdSpd1, motorSpdReverse1);
 
 void setup()
 {
-  Serial.begin(9600);
-  //wheel1.initialize();
-  //wheel2.initialize();
-  //wheel3.initialize();
+  Serial.begin(115200);
   Serial.println("Started!");
 }
 
 //180.0 0.0 0.0 0.0 0.0 0.0
 //180.0 0.0 180.0 0.0 180.0 0.0
 //205.0 0.0 125.0 0.0 65.0 0.0
-void moveTelejka()
-{
-  wheel1.moveToAngle();
-  //wheel2.moveToAngle();
-  //wheel3.moveToAngle();
 
-}
 
-// 0.0 10.0 0.0 0.0 0.0 0.0
+
+// 0.0 50.0 0.0 0.0 0.0 0.0
 void loop()
 {
   if (Serial.available() > 0)
@@ -260,16 +235,11 @@ void loop()
     for (int i = 0; i < 6; ++i)
     {
       xyz.at(i) = Serial.parseFloat();
-      Serial.println(xyz.at(i));
+      //Serial.println(xyz.at(i));
     }
-    wheel1.setSpd(xyz.at(1));
+    wheel1.desiredSpd = xyz.at(1);
   }
-    
-  double tmp = wheel1.getCurRollSpeed();
-  if (tmp > 0)
-  {
-    Serial.println(tmp);
-  }
-  //moveTelejka();
+  
+  wheel1.setRollSpd();
 }
 
