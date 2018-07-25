@@ -1,6 +1,7 @@
 #include <Array.h>
 
 double speed4wheel;
+double dist4wheel;
 
 Array<double, 6> xyz;
 
@@ -30,14 +31,16 @@ const int motorRollReverse3 = 27;
 
 class wheel
 {
+    //************************************
     const int potentPin;
     const int motorTurnSpdPin;
     const int motorTurnReversePin;
     const double turnEps;
     const double turnKoefPID;
     const double gearsKoef;
+    bool angleReached;
 
-    double angle;
+    double desiredAngle;
 
     int stopTurn();
     int updateAngle();
@@ -46,6 +49,7 @@ class wheel
     int rollCounterClock();
     double getCurrentAngle();
 
+    //************************************
     const int optoPin;
     const int motorRollSpdPin;
     const int motorRollReversePin;
@@ -62,14 +66,25 @@ class wheel
 
     void updateCurRollSpd();
 
+    //************************************
+    double currentDistance;
+    double desiredDistance;
+
   public:
     wheel(int pot, int mS, int mR, int opto, int mRSP, int mRR);
+
     int setRollSpd(double spdIn);
     void updateRollSpd();
     void stopMove();
 
+    void setAngle(double angleIn);
     int moveToAngle();
-    void setAngle(double angle_in);
+    bool isAngleReached();
+
+    void setDistance(double dist);
+    void resetOdometer();
+    bool isDistReached();
+    double getDistance();
 };
 
 wheel::wheel(int pot, int mS, int mR, int opto, int mRSP, int mRR)
@@ -78,7 +93,7 @@ wheel::wheel(int pot, int mS, int mR, int opto, int mRSP, int mRR)
   motorTurnSpdPin(mS),
   motorTurnReversePin(mR),
   turnEps(1.0),
-  angle(175.0),
+  desiredAngle(175.0),
   turnKoefPID(1.4),
   gearsKoef(94. / 75.),
 
@@ -88,7 +103,9 @@ wheel::wheel(int pot, int mS, int mR, int opto, int mRSP, int mRR)
   prevTime(micros()),
   sendSpd(0),
   currentSpd(0),
-  desiredSpd(0)
+  desiredSpd(0),
+  desiredDistance(0),
+  currentDistance(0)
 {
   pinMode(motorTurnSpdPin, OUTPUT);
   pinMode(motorTurnReversePin, OUTPUT);
@@ -122,6 +139,7 @@ void wheel::updateCurRollSpd()
     prevTime = micros();
     curState == true ? stepTime *= 1.382239382 : stepTime *= 0.7306122449;
     currentSpd = 5. / (static_cast<double>(stepTime) / 1e6);  // 5 mm / (time in microseconds / 1 000 000);
+    currentDistance += 5.0;
   }
 }
 
@@ -158,10 +176,10 @@ void wheel::updateRollSpd()
         sendSpd = 50;
       }
 
-// ********************************************
-// It's big (very, very big!) crutch while we haven't last gear to measure wheel's speed!
-// Now we synchronize 1st and 3rd wheels
-// ********************************************
+      // ********************************************
+      // It's big (very, very big!) crutch while we haven't last gear to measure wheel's speed!
+      // Now we synchronize 1st and 3rd wheels
+      // ********************************************
       if (motorRollSpdPin == motorRollSpd1)
       {
         speed4wheel = sendSpd;
@@ -170,31 +188,33 @@ void wheel::updateRollSpd()
       {
         sendSpd = speed4wheel;
       }
-// ********************************************
+      // ********************************************
       analogWrite(motorRollSpdPin, sendSpd);
     }
   }
 }
+
 int wheel::stopTurn()
 {
   analogWrite(motorTurnSpdPin, 0);
 }
 
-void wheel::setAngle(double angle_in)
+void wheel::setAngle(double angleIn)
 {
-  if (abs(angle_in) > 120)
+  angleReached = false;
+  if (abs(angleIn) > 120)
   {
-    if (angle_in > 120)
+    if (angleIn > 120)
     {
-      angle_in = 120;
+      angleIn = 120;
     }
-    if (angle_in < -120)
+    if (angleIn < -120)
     {
-      angle_in = -120;
+      angleIn = -120;
     }
 
   }
-  angle = (angle_in + 140) * gearsKoef;
+  desiredAngle = (angleIn + 140) * gearsKoef;
 }
 
 int wheel::moveToAngle()
@@ -204,7 +224,7 @@ int wheel::moveToAngle()
   {
     stopTurn();
   }
-  if ((angle <= 330) && (angle >= 0))
+  if ((desiredAngle <= 330) && (desiredAngle >= 0))
   {
     updateAngle();
   }
@@ -215,9 +235,9 @@ int wheel::updateAngle()
   double spd;
   double minDelta = 30;
   double curAng = getCurrentAngle();
-  if (abs(angle - curAng) > turnEps)
+  if (abs(desiredAngle - curAng) > turnEps)
   {
-    double delta = curAng - angle;
+    double delta = curAng - desiredAngle;
 
     if (abs(delta) < minDelta)
     {
@@ -232,6 +252,7 @@ int wheel::updateAngle()
   else
   {
     stopTurn();
+    angleReached = true;
     //Serial.println("Stopped!");
   }
 }
@@ -257,11 +278,30 @@ int wheel::rollCounterClock()
   digitalWrite(motorTurnReversePin, LOW);
 }
 
+bool wheel::isAngleReached()
+{
+  return angleReached;
+}
 // 180.0 0.0 0.0 0.0 0.0 0.0
 // 180.0 0.0 180.0 0.0 180.0 0.0
 // 30.0 0.0 -30.0 0.0 -90.0 0.0
-// 0.0 0.0 0.0 0.0 0.0 0.0
-// 0.0 20.0 0.0 20.0 0.0 20.0
+// 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+// 0.0 150.0 500.0 0.0 150.0 500.0 0.0 150.0 500.0
+
+void wheel::resetOdometer()
+{
+  currentDistance = 0.;
+}
+
+bool wheel::isDistReached()
+{
+  return (desiredDistance - currentDistance) <= 5.;
+}
+
+double wheel::getDistance()
+{
+  return currentDistance;
+}
 
 wheel wheel1(potent1, motorTurnSpd1, motorTurnReverse1, opto1, motorRollSpd1, motorRollReverse1);
 wheel wheel2(potent2, motorTurnSpd2, motorTurnReverse2, opto2, motorRollSpd2, motorRollReverse2);
@@ -270,13 +310,29 @@ wheel wheel3(potent3, motorTurnSpd3, motorTurnReverse3, opto3, motorRollSpd3, mo
 void moveTelejka()
 {
   wheel1.moveToAngle();
-  wheel1.updateRollSpd();
-
   wheel2.moveToAngle();
-  wheel2.updateRollSpd();
-
   wheel3.moveToAngle();
-  wheel3.updateRollSpd();
+
+  if (wheel1.isAngleReached() && wheel2.isAngleReached() && wheel3.isAngleReached())
+  {
+    wheel1.isDistReached() ? wheel1.stopMove() : wheel1.updateRollSpd();
+    wheel2.isDistReached() ? wheel2.stopMove() : wheel2.updateRollSpd();
+    wheel2.isDistReached() ? wheel3.stopMove() : wheel3.updateRollSpd();  // !!! IT'S CRUTCH!!! You must to use wheel3.isDistReached()
+  }
+}
+
+void gettingDistanse()
+{
+  Serial.print(wheel1.getDistance());
+  Serial.print("\t");
+  Serial.print(wheel2.getDistance());
+  Serial.print("\t");
+  Serial.println(wheel3.getDistance());
+}
+
+void wheel::setDistance(double dist)
+{
+  desiredDistance = dist;
 }
 
 void setup()
@@ -290,22 +346,29 @@ void loop()
 {
   if (Serial.available() > 0)
   {
-    for (int i = 0; i < 6; ++i)
+    for (int i = 0; i < 9; ++i)
     {
       xyz.at(i) = Serial.parseFloat();
       Serial.println(xyz.at(i));
     }
-    Serial.flush();
 
     wheel1.setAngle(xyz.at(0));
     wheel1.setRollSpd(xyz.at(1));
+    wheel1.setDistance(xyz.at(2));
 
-    wheel2.setAngle(xyz.at(2));
-    wheel2.setRollSpd(xyz.at(3));
+    wheel2.setAngle(xyz.at(3));
+    wheel2.setRollSpd(xyz.at(4));
+    wheel2.setDistance(xyz.at(5));
 
-    wheel3.setAngle(xyz.at(4));
-    wheel3.setRollSpd(xyz.at(5));
+    wheel3.setAngle(xyz.at(6));
+    wheel3.setRollSpd(xyz.at(7));
+    wheel3.setDistance(xyz.at(8));
+
+    wheel1.resetOdometer();
+    wheel2.resetOdometer();
+    wheel3.resetOdometer();
   }
   moveTelejka();
+  gettingDistanse();
 }
 
