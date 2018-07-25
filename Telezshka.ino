@@ -38,7 +38,7 @@ class wheel
     double angle;
 
     int stopTurn();
-    int standAngle();
+    int updateAngle();
     int setTurnSpd(double spd);
     int rollClockwise();
     int rollCounterClock();
@@ -180,15 +180,16 @@ void wheel::setAngle(double angle_in)
   }
   angle = (angle_in + 140) * gearsKoef;
 }
+
 int wheel::moveToAngle()
 {
   if ((angle <= 330) && (angle >= 0))
   {
-    standAngle();
+    updateAngle();
   }
 }
 
-int wheel::standAngle()
+int wheel::updateAngle()
 {
   double spd;
   double minDelta = 30;
@@ -235,26 +236,28 @@ int wheel::rollCounterClock()
   digitalWrite(motorTurnReversePin, LOW);
 }
 
+// 180.0 0.0 0.0 0.0 0.0 0.0
+// 180.0 0.0 180.0 0.0 180.0 0.0
+// 30.0 0.0 -30.0 0.0 -90.0 0.0
+// 0.0 0.0 0.0 0.0 0.0 0.0
+// 0.0 20.0 0.0 20.0 0.0 20.0
 
-//180.0 0.0 0.0 0.0 0.0 0.0
-//180.0 0.0 180.0 0.0 180.0 0.0
-//30.0 0.0 -30.0 0.0 -90.0 0.0
-// 0.0 50.0 0.0 0.0 0.0 0.0
+wheel wheel1(potent1, motorTurnSpd1, motorTurnReverse1, opto1, motorRollSpd1, motorRollReverse1);
+wheel wheel2(potent2, motorTurnSpd2, motorTurnReverse2, opto2, motorRollSpd2, motorRollReverse2);
+wheel wheel3(potent3, motorTurnSpd3, motorTurnReverse3, opto3, motorRollSpd3, motorRollReverse3);
 
 void moveTelejka()
 {
   wheel1.moveToAngle();
   wheel1.updateRollSpd();
+  
   wheel2.moveToAngle();
   wheel2.updateRollSpd();
+  
   wheel3.moveToAngle();
   wheel3.updateRollSpd();
-}
-  
-wheel wheel1(potent1, motorTurnSpd1, motorTurnReverse1, opto1, motorRollSpd1, motorRollReverse1);
-wheel wheel2(potent2, motorTurnSpd2, motorTurnReverse2, opto2, motorRollSpd2, motorRollReverse2);
-wheel wheel3(potent3, motorTurnSpd3, motorTurnReverse3, opto3, motorRollSpd3, motorRollReverse3);
-      
+}      
+
 void setup()
 {
   Serial.begin(9600);
@@ -274,8 +277,10 @@ void loop()
     
     wheel1.setAngle(xyz.at(0));
     wheel1.setRollSpd(xyz.at(1));
+    
     wheel2.setAngle(xyz.at(2));
     wheel2.setRollSpd(xyz.at(3));
+    
     wheel3.setAngle(xyz.at(4));
     wheel3.setRollSpd(xyz.at(5));
   }  
