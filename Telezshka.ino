@@ -1,5 +1,7 @@
 #include <Array.h>
 
+double speed4wheel;
+
 Array<double, 6> xyz;
 
 const int potent1 = A1;
@@ -47,19 +49,19 @@ class wheel
     const int optoPin;
     const int motorRollSpdPin;
     const int motorRollReversePin;
-  
+
     double sendSpd;
     double desiredSpd;
     double currentSpd;
-    
+
     bool prevState;
     unsigned long prevTime;
 
     int rollForward();
     int rollBackward();
-    
+
     void updateCurRollSpd();
-    
+
   public:
     wheel(int pot, int mS, int mR, int opto, int mRSP, int mRR);
     int setRollSpd(double spdIn);
@@ -91,11 +93,11 @@ wheel::wheel(int pot, int mS, int mR, int opto, int mRSP, int mRR)
   pinMode(motorTurnSpdPin, OUTPUT);
   pinMode(motorTurnReversePin, OUTPUT);
   pinMode(potentPin, INPUT);
-    
+
   pinMode(optoPin, INPUT);
   pinMode(motorRollSpdPin, OUTPUT);
   pinMode(motorRollReversePin, OUTPUT);
-  
+
   prevState = digitalRead(optoPin);
 }
 
@@ -115,7 +117,7 @@ void wheel::updateCurRollSpd()
   if (curState != prevState)
   {
     unsigned long stepTime = micros() - prevTime;
-    
+
     prevState = curState;
     prevTime = micros();
     curState == true ? stepTime *= 1.382239382 : stepTime *= 0.7306122449;
@@ -146,7 +148,7 @@ void wheel::updateRollSpd()
     double delta = abs(desiredSpd) - currentSpd;
     if (abs(delta) > 10.0)
     {
-      sendSpd += (255.0 / 200.0) * delta / 500.0;  // 200 - maxSpeed 2.0 - koef PID 
+      sendSpd += (255.0 / 200.0) * delta / 500.0;  // 200 - maxSpeed 2.0 - koef PID
       if (sendSpd > 255)
       {
         sendSpd = 255;
@@ -155,6 +157,20 @@ void wheel::updateRollSpd()
       {
         sendSpd = 50;
       }
+
+// ********************************************
+// It's big (very, very big!) crutch while we haven't last gear to measure wheel's speed!
+// Now we synchronize 1st and 3rd wheels
+// ********************************************
+      if (motorRollSpdPin == motorRollSpd1)
+      {
+        speed4wheel = sendSpd;
+      }
+      if (motorRollSpdPin == motorRollSpd3)
+      {
+        sendSpd = speed4wheel;
+      }
+// ********************************************
       analogWrite(motorRollSpdPin, sendSpd);
     }
   }
@@ -183,6 +199,11 @@ void wheel::setAngle(double angle_in)
 
 int wheel::moveToAngle()
 {
+  double curA = getCurrentAngle();
+  if (curA < 10 or curA > 320)
+  {
+    stopTurn();
+  }
   if ((angle <= 330) && (angle >= 0))
   {
     updateAngle();
@@ -193,10 +214,10 @@ int wheel::updateAngle()
 {
   double spd;
   double minDelta = 30;
-
-  if (abs(angle - getCurrentAngle()) > turnEps)
+  double curAng = getCurrentAngle();
+  if (abs(angle - curAng) > turnEps)
   {
-    double delta = getCurrentAngle() - angle;
+    double delta = curAng - angle;
 
     if (abs(delta) < minDelta)
     {
@@ -211,7 +232,7 @@ int wheel::updateAngle()
   else
   {
     stopTurn();
-    Serial.println("Stopped!");
+    //Serial.println("Stopped!");
   }
 }
 
@@ -250,20 +271,21 @@ void moveTelejka()
 {
   wheel1.moveToAngle();
   wheel1.updateRollSpd();
-  
+
   wheel2.moveToAngle();
   wheel2.updateRollSpd();
-  
+
   wheel3.moveToAngle();
   wheel3.updateRollSpd();
-}      
+}
 
 void setup()
 {
   Serial.begin(9600);
+  Serial.setTimeout(0);
   Serial.println("Started!");
 }
-      
+
 void loop()
 {
   if (Serial.available() > 0)
@@ -274,16 +296,16 @@ void loop()
       Serial.println(xyz.at(i));
     }
     Serial.flush();
-    
+
     wheel1.setAngle(xyz.at(0));
     wheel1.setRollSpd(xyz.at(1));
-    
+
     wheel2.setAngle(xyz.at(2));
     wheel2.setRollSpd(xyz.at(3));
-    
+
     wheel3.setAngle(xyz.at(4));
     wheel3.setRollSpd(xyz.at(5));
-  }  
+  }
   moveTelejka();
 }
 
