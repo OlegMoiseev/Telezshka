@@ -1,8 +1,5 @@
 #include <Array.h>
 
-double speed4wheel;
-double dist4wheel;
-
 Array<double, 6> xyz;
 
 const int potent1 = A1;
@@ -175,20 +172,6 @@ void wheel::updateRollSpd()
       {
         sendSpd = 50;
       }
-
-      // ********************************************
-      // It's big (very, very big!) crutch while we haven't last gear to measure wheel's speed!
-      // Now we synchronize 1st and 3rd wheels
-      // ********************************************
-      if (motorRollSpdPin == motorRollSpd1)
-      {
-        speed4wheel = sendSpd;
-      }
-      if (motorRollSpdPin == motorRollSpd3)
-      {
-        sendSpd = speed4wheel;
-      }
-      // ********************************************
       analogWrite(motorRollSpdPin, sendSpd);
     }
   }
@@ -317,7 +300,7 @@ void moveTelejka()
   {
     wheel1.isDistReached() ? wheel1.stopMove() : wheel1.updateRollSpd();
     wheel2.isDistReached() ? wheel2.stopMove() : wheel2.updateRollSpd();
-    wheel2.isDistReached() ? wheel3.stopMove() : wheel3.updateRollSpd();  // !!! IT'S CRUTCH!!! You must to use wheel3.isDistReached()
+    wheel3.isDistReached() ? wheel3.stopMove() : wheel3.updateRollSpd();
   }
 }
 
