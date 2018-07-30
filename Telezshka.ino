@@ -67,6 +67,8 @@ class wheel
     double currentDistance;
     double desiredDistance;
 
+    bool done;
+    bool moveStop;
   public:
     wheel(int pot, int mS, int mR, int opto, int mRSP, int mRR);
 
@@ -82,6 +84,8 @@ class wheel
     void resetOdometer();
     bool isDistReached();
     double getDistance();
+    bool getDone();
+    void setDone(bool doneIn);
 };
 
 wheel::wheel(int pot, int mS, int mR, int opto, int mRSP, int mRR)
@@ -102,7 +106,9 @@ wheel::wheel(int pot, int mS, int mR, int opto, int mRSP, int mRR)
   currentSpd(0),
   desiredSpd(0),
   desiredDistance(0),
-  currentDistance(0)
+  currentDistance(0),
+  done(false),
+  moveStop(false)
 {
   pinMode(motorTurnSpdPin, OUTPUT);
   pinMode(motorTurnReversePin, OUTPUT);
@@ -148,6 +154,11 @@ int wheel::setRollSpd(double spdIn)
 void wheel::stopMove()
 {
   analogWrite(motorRollSpdPin, 0);
+  if (moveStop)
+  {
+    moveStop = false;
+    done = true;
+  }
 }
 
 void wheel::updateRollSpd()
@@ -174,6 +185,7 @@ void wheel::updateRollSpd()
       }
       analogWrite(motorRollSpdPin, sendSpd);
     }
+    moveStop = true;
   }
 }
 
@@ -248,6 +260,14 @@ double wheel::getCurrentAngle()
 int wheel::setTurnSpd(double spd)
 {
   spd > 0 ? rollClockwise() : rollCounterClock();
+  if (spd > 255)
+  {
+    spd = 255;
+  }
+  if (spd < -255)
+  {
+    spd = -255;
+  }
   analogWrite(motorTurnSpdPin, abs(spd));
 }
 
@@ -267,7 +287,7 @@ bool wheel::isAngleReached()
 }
 // 180.0 0.0 0.0 0.0 0.0 0.0
 // 180.0 0.0 180.0 0.0 180.0 0.0
-// 30.0 0.0 -30.0 0.0 -90.0 0.0
+// 30.0 0.0 0.0 -30.0 0.0 0.0 -90.0 0.0 0.0
 // 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 // 0.0 150.0 500.0 0.0 150.0 500.0 0.0 150.0 500.0
 
@@ -286,6 +306,14 @@ double wheel::getDistance()
   return currentDistance;
 }
 
+bool wheel::getDone()
+{
+  return done;
+}
+void wheel::setDone(bool doneIn)
+{
+  done = doneIn;
+}
 wheel wheel1(potent1, motorTurnSpd1, motorTurnReverse1, opto1, motorRollSpd1, motorRollReverse1);
 wheel wheel2(potent2, motorTurnSpd2, motorTurnReverse2, opto2, motorRollSpd2, motorRollReverse2);
 wheel wheel3(potent3, motorTurnSpd3, motorTurnReverse3, opto3, motorRollSpd3, motorRollReverse3);
@@ -306,11 +334,14 @@ void moveTelejka()
 
 void gettingDistanse()
 {
-  Serial.print(wheel1.getDistance());
-  Serial.print("\t");
-  Serial.print(wheel2.getDistance());
-  Serial.print("\t");
-  Serial.println(wheel3.getDistance());
+  /*Serial.print(wheel1.getDistance());
+    Serial.print("\t");
+    Serial.print(wheel2.getDistance());
+    Serial.print("\t");
+    Serial.println(wheel3.getDistance());*/
+  wheel1.getDistance();
+  wheel2.getDistance();
+  wheel3.getDistance();
 }
 
 void wheel::setDistance(double dist)
@@ -321,8 +352,8 @@ void wheel::setDistance(double dist)
 void setup()
 {
   Serial.begin(9600);
-  Serial.setTimeout(0);
-  Serial.println("Started!");
+  Serial.setTimeout(100);
+  Serial.println("Started");
 }
 
 void loop()
@@ -332,9 +363,7 @@ void loop()
     for (int i = 0; i < 9; ++i)
     {
       xyz.at(i) = Serial.parseFloat();
-      Serial.println(xyz.at(i));
     }
-
     wheel1.setAngle(xyz.at(0));
     wheel1.setRollSpd(xyz.at(1));
     wheel1.setDistance(xyz.at(2));
@@ -352,6 +381,13 @@ void loop()
     wheel3.resetOdometer();
   }
   moveTelejka();
-  gettingDistanse();
+
+  if (wheel1.getDone() && wheel2.getDone() && wheel3.getDone())
+  {
+    wheel1.setDone(false);
+    wheel2.setDone(false);
+    wheel3.setDone(false);
+    Serial.println("done");
+  }
 }
 
