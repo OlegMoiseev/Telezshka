@@ -2,83 +2,72 @@
 #include <Array.h>
 
 #define calibration_factor -7050.0 //This value is obtained using the SparkFun_HX711_Calibration sketch
-//#define DOUT1  5
-//#define CLK1  4
-const int DOUT2 = 3;
-const int CLK2 = 2;
+
+const int CLK2 = 2; //2 * i + 2 == 0 + 2
+const int DOUT2 = 3; //2 * i + 3 == 0 + 3
+
+const int CLK3 = 4;  //1 + 3 == 2 * i + 2
+const int DOUT3 = 5;  //1 + 4 == 2 * i + 3
+
+const int CLK4 = 6;  //2 + 4
+const int DOUT4 = 7;  //2 + 5
+
+const int CLK5 = 8;  //3 + 5 == 2 * i + 2
+const int DOUT5 = 9;  //3 + 6 == 2 * i + 3
 
 double epsForce = 3.0;
 bool check = true;
-int emergencyStop = 8;
+const int emergencyStop = 12;
 Array<HX711, 9> tenzo;
 
-void setup() {
+const int numSensors = 7;
+
+void setup()
+{
   Serial.begin(9600);
   Serial.setTimeout(0);
-  //for(int i = 0; i < 9; ++i)
-  //{
-    tenzo[0] = HX711(2, 3);
-    tenzo[0].set_scale(calibration_factor);
-    tenzo[0].tare();
-  //}
-  pinMode(emergencyStop, OUTPUT);
-}
-void tenzo_dat()
-{
-    double maxForce = 0.0;
-    double maxForceSide; 
-    int forceNum = -1;
-    double force;
-    //for(int i=0; i<9; i++)
-    //{
-      force = tenzo[0].get_units();
-      Serial.println(force);
-      if (maxForce < abs(force))
-      {
-      //  if (i % 3 == 0)
-        //{
-            maxForce = force;
-            forceNum = 0;
-//        }
-//        if (i % 3 == 1)
-//        {
-//          maxForce = abs(force);
-//          maxForceSide = tenzo[i+1].get_units();
-//          forceNum = i;
-//        }
-//        if (i % 3 == 2)
-//        {
-//          maxForce = abs(force);
-//          maxForceSide = tenzo[i-1].get_units();
-//        }
-        }
-//    }
-    if (maxForce > epsForce)
+
+  for (int i = 0; i < numSensors; ++i)
+  {
+    if (i > 4)
     {
-      Serial.print("Collision! ");
-      if (forceNum % 3 == 0)
-      {
-        Serial.print(forceNum);
-        Serial.print(" tenzo, force is ");
-        Serial.print(maxForce);
-      }
-      if (forceNum % 3 == 1)
-      {
-        contact(forceNum, maxForce, maxForceSide,1);
-      }
-      if (forceNum % 3 ==  2)
-      {
-        contact(forceNum, maxForce, maxForceSide,-1); 
-      }
-      digitalWrite(emergencyStop, LOW);
+      tenzo[i] = HX711(2 * (i + 1) + 2, 2 * (i + 1) + 3);
     }
     else
     {
-      digitalWrite(emergencyStop, HIGH);
+      tenzo[i] = HX711(2 * i + 2, 2 * i + 3);
     }
-    
+    tenzo[i].set_scale(calibration_factor);
+    tenzo[i].tare();
+  }
+  pinMode(emergencyStop, OUTPUT);
 }
- 
+
+void tenzo_dat()
+{
+  bool allStop = false;
+  double force;
+  String out = "";
+
+  for (int i = 0; i < numSensors; ++i)
+  {
+    force = tenzo[i].get_units();
+    out += String(force) + '\t';
+    
+    if (abs(force) > epsForce)
+    {
+      //Serial.print("Collision!\t");
+      digitalWrite(emergencyStop, LOW);
+      allStop = true;
+    }
+  }
+  Serial.println(out);
+  if (!allStop)
+  {
+    digitalWrite(emergencyStop, HIGH);
+  }
+}
+
 void contact(int num, double d1, double d2, int sng)
 {
   if (d2 < 0)
@@ -86,24 +75,24 @@ void contact(int num, double d1, double d2, int sng)
     Serial.print("near with ");
     Serial.print(num);
     Serial.print(" tenzo, force is ");
-    Serial.println(d1-d2); 
+    Serial.println(d1 - d2);
   }
   else
   {
     Serial.print("between ");
     Serial.print(num);
     Serial.print(" and ");
-    Serial.print(num+sng);
+    Serial.print(num + sng);
     Serial.print(" tenzo's, force is ");
-    Serial.print(d1+d2);
+    Serial.print(d1 + d2);
     Serial.print("on distance ");
     Serial.print( (d1 / (d1 + d2)) * 47.0);  //47 - distance between  tenzo
     Serial.print(" sm from tenzo ");
-    Serial.println(num);  
+    Serial.println(num);
   }
 }
 
-void loop() 
+void loop()
 {
-    tenzo_dat();
+  tenzo_dat();
 }
