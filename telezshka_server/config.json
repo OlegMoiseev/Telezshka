@@ -1,0 +1,7 @@
+{
+    "RobotServer": {
+        "IPAdress": "",
+        "Port": "9092",
+        "COMPort": "/dev/ttyUSB0"
+    }
+}
