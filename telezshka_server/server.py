@@ -1,3 +1,4 @@
+import json
 import serial
 import socket
 import time
@@ -19,7 +20,7 @@ def validate_str(in_str: str):
 
 
 def report_done(sock):
-    sock.send("done".encode())
+    sock.send("1 ".encode())
 
 
 def report_error(num, sock):
@@ -37,16 +38,18 @@ class Telega:
 
     def send_to(self, in_str: str):
         self.com.write(in_str.encode())
-        print("Send to telega:", in_str.encode())
+        # print("Send to telega:", in_str.encode())
 
     def recv_from(self):
+        # time.sleep(1)
         ans = self.com.read(4).decode()
+        # ans = "done"
         print("Recv from telega:", ans.encode())
         return ans
-        # return 0
 
     def recv_init(self):
         ans = self.com.readline().decode()
+        # ans = "Init completed"
         print("Recv from telega:", ans.encode())
         return ans
 
@@ -90,7 +93,7 @@ def two_command_move(sock, obj):
 
 
 def one_command_move(sock, obj):
-    go_line = sock.recv(128).decode()
+    go_line = sock.recv(128).decode()[2:]
     print("From CU: ", go_line)
     if go_line == zero_str:
         report_done(sock)
@@ -114,18 +117,32 @@ def one_command_move(sock, obj):
     return 0
 
 
-telega = Telega("/dev/ttyUSB0")  # from Arduino studio COM-port
-zero_str = "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
-ip = ""  # empty == localhost
-port = 9092
+with open("config.json") as file:
+    config_json = json.load(file)
 
-print("Server started!")
-from_cu_sock, addr_from = create_server(ip, port).accept()
-print("Connected CU by", port, ":", addr_from)
+telega = Telega(config_json["RobotServer"]["COMPort"])  # from Arduino studio COM-port
 print(telega.recv_init())
-while True:
-    if one_command_move(from_cu_sock, telega) != 0:
-        break
+print("Telega started!")
+ip = config_json["RobotServer"]["IPAddress"]  # empty == localhost
+port = int(config_json["RobotServer"]["port"])
+zero_str = "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
 
-from_cu_sock.close()
+print("Application started!")
+
+while True:
+    from_cu_sock, addr_from = create_server(ip, port).accept()
+    print("Server started!")
+    print("Connected CU by", port, ":", addr_from)
+    try:
+        while True:
+            if one_command_move(from_cu_sock, telega) != 0:
+                break
+
+    except:
+        print("Connect aborted by exception")
+
+    from_cu_sock.close()
+    print("Connection aborted by Danya")
+    time.sleep(5)
+
 telega.stop()
