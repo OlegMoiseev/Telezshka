@@ -1,5 +1,16 @@
 #include <Telezshka.h>
 
+//#define ANALOGSENSOR;
+//#define ANGLEMOTOR;
+//#define DIGITALSENSOR;
+//#define MOTOR;
+//#define ODOMETER;
+//#define OPTOSENSOR;
+//#define POTENTIOMETER;
+//#define SPEEDMOTOR;
+//#define TELEZSHKA;
+//#define WHEEL;
+
 int pFW1 [6] = {29, A1, 5, 25, 2, 22};
 int pFW2 [6] = {28, A2, 6, 26, 3, 23};
 int pFW3 [6] = {30, A3, 7, 27, 4, 24};
