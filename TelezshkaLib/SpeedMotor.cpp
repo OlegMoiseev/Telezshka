@@ -4,15 +4,15 @@ SpeedMotor::SpeedMotor(const int optoPin, const int speedPin, const int reverseP
   :
   _opto(OptoSensor(optoPin)),
   Motor(speedPin, reversePin),
-  _needSpeed(0),
-  _sendSpd(0)
+  _needSpeed(0.),
+  _sendSpd(0.)
 {
 
 }
 
 void SpeedMotor::stopMove()
 {
-  setRotationSpeed(0);
+  setRotationSpeed(0.);
   _opto._odometer.resetOdometer();
 }
 
@@ -37,7 +37,7 @@ void SpeedMotor::standSpeed()
       {
         _sendSpd = 50.;
       }
-      if (_needSpeed > 0)
+      if (_needSpeed > 0.)
       {
         setRotationSpeed(_sendSpd);
       }

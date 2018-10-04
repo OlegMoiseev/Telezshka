@@ -9,12 +9,12 @@ Odometer::Odometer()
 
 void Odometer::resetOdometer()
 {
-  _distance = 0;
+  _distance = 0.;
 }
 
 void Odometer::updateDistance()
 {
-  _distance += 5.0;
+  _distance += 5.;
 }
 
 double Odometer::getDistance()

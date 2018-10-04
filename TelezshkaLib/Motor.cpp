@@ -21,6 +21,6 @@ void Motor::rollBackward()
 
 void Motor::setRotationSpeed(double spd)
 {
-  spd > 0 ? rollBackward() : rollForward();
-  abs(spd) > 255 ? analogWrite(_speedPin, 255) : analogWrite(_speedPin, abs(spd));
+  spd > 0. ? rollBackward() : rollForward();
+  abs(spd) > 255. ? analogWrite(_speedPin, 255.) : analogWrite(_speedPin, abs(spd));
 }

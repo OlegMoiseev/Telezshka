@@ -5,8 +5,8 @@ AngleMotor::AngleMotor(const int potenPin, const int speedPin, const int reverse
   _poten(Potentiometer(potenPin)),
   Motor(speedPin, reversePin),
   _turnKoefPID(1.4),
-  _turnEps(5.0),
-  _needAngle(175.0),
+  _turnEps(1.),
+  _needAngle(175.),
   _gearsKoef(94. / 75.),
   _angleReached(false)
 {
@@ -30,18 +30,18 @@ AngleMotor& AngleMotor::operator= (AngleMotor &some)
 void AngleMotor::setAngle(double angle)
 {
   _angleReached = false;
-  if (abs(angle) > 120)
+  if (abs(angle) > 120.)
   {
-    if (angle > 120)
+    if (angle > 120.)
     {
-      angle = 120;
+      angle = 120.;
     }
-    if (angle < -120)
+    if (angle < -120.)
     {
-      angle = -120;
+      angle = -120.;
     }
   }
-  _needAngle = (angle + 140) * _gearsKoef;
+  _needAngle = (angle + 140.) * _gearsKoef;
 }
 
 double AngleMotor::getAngleNow()
@@ -52,15 +52,15 @@ double AngleMotor::getAngleNow()
 void AngleMotor::standAngle()
 {
   _currentAngle = _poten.getAngle();
-  if ((_currentAngle < 10) || (_currentAngle > 320))
+  if ((_currentAngle < 10.) || (_currentAngle > 320.))
   {
-    setRotationSpeed(0);
+    setRotationSpeed(0.);
   }
 
-  if ((_needAngle <= 330) && (_needAngle >= 0))
+  if ((_needAngle <= 330.) && (_needAngle >= 0.))
   {
     double spd;
-    double minDelta = 30;
+    double minDelta = 30.;
 
     if (abs(_needAngle - _currentAngle) > _turnEps)
     {
@@ -77,7 +77,7 @@ void AngleMotor::standAngle()
     }
     else
     {
-      setRotationSpeed(0.0);
+      setRotationSpeed(0.);
       _angleReached = true;
       //Serial.println("Stopped!");
     }
