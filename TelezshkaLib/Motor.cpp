@@ -9,7 +9,7 @@ Motor::Motor(const int speedPin, const int reversePin)
 		Serial.print("MOTOR init with pins speedPin = ");
 		Serial.print(_speedPin);
 		Serial.print(" reversePin = ");
-		Serial.print(_reversePin);
+		Serial.println(_reversePin);
 	#endif
 
   	pinMode(_speedPin, OUTPUT);

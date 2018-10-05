@@ -16,8 +16,6 @@ int pFW2 [6] = {28, A2, 6, 26, 3, 23};
 int pFW3 [6] = {30, A3, 7, 27, 4, 24};
 
 double xyz [3 * numberOfWheels];
-
-Telezshka telega(pFW1, pFW2, pFW3);
  
 // 30.0 0.0 0.0 -30.0 0.0 0.0 -90.0 0.0 0.0
 // 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
@@ -29,6 +27,9 @@ void setup()
   Serial.setTimeout(100);
   Serial.println("Started");
 }
+
+
+Telezshka telega(pFW1, pFW2, pFW3);
 
 void loop()
 {   
