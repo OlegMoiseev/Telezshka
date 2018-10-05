@@ -4,7 +4,8 @@ OptoSensor::OptoSensor(const int pin)
   :
   _prevTime(micros()),
   DigitalSensor(pin),
-  _odometer(Odometer())
+  _odometer(Odometer()),
+  _prevState(!getData())
 {
   #ifdef OPTOSENSOR
     Serial.print("OPTOSENSOR init with prevTime = ");
