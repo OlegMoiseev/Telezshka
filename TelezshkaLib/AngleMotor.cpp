@@ -28,7 +28,6 @@ AngleMotor::AngleMotor(const int potenPin, const int speedPin, const int reverse
     Serial.print(", angleReached ");
     Serial.println(_angleReached);
   #endif
-
 }
 
 AngleMotor& AngleMotor::operator= (AngleMotor &some)

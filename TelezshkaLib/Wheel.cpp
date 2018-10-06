@@ -36,7 +36,7 @@ void Wheel::setMove(double angle, double spd, double distance)
 {
   #ifdef WHEEL
     Serial.print("WHEEL called setMove and angle = ");
-    Serial.print(andle);
+    Serial.print(angle);
     Serial.print(" speed = ");
     Serial.print(spd);
     Serial.print(" distance = ");

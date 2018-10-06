@@ -4,11 +4,11 @@ DigitalSensor::DigitalSensor(const int pin)
   :
   _pin(pin)
 {
-
 	#ifdef DIGITALSENSOR
 		Serial.print("DIGITALSENSOR init on pin = ");
 		Serial.println(_pin);
 	#endif
+
   	pinMode(_pin, INPUT);
 }
 

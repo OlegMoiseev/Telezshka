@@ -105,7 +105,7 @@ Array<double, 2 * numberOfWheels> Telezshka::telezshkaCurrentPosition()
 bool Telezshka::isReachedDistance()
 {
   #ifdef TELEZSHKA
-    Serial.println("TELEZSHKA called isReachedDistance");
+    Serial.print("TELEZSHKA called isReachedDistance");
   #endif
 
   bool tmp = true;
@@ -118,10 +118,18 @@ bool Telezshka::isReachedDistance()
   if (_doneMove && tmp)
   {
     _doneMove = false;
+    #ifdef TELEZSHKA
+      Serial.println("with TRUE");
+    #endif
+    
     return true;
   }
   else
   {
+    #ifdef TELEZSHKA
+      Serial.println("with FALSE");
+    #endif
+
     return false;
   }
 }

@@ -10,6 +10,7 @@
 #include "AngleMotor.h"
 #include "SpeedMotor.h"
 #include "Odometer.h"
+#include "defines.h"
 #include <Array.h>
 
 class Wheel

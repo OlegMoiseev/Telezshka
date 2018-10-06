@@ -8,6 +8,7 @@
 #endif
 
 #include "AnalogSensor.h"
+#include "defines.h"
 
 class Potentiometer : public AnalogSensor
 {
