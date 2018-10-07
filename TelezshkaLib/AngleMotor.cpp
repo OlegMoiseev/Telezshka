@@ -97,9 +97,9 @@ void AngleMotor::standAngle()
     setRotationSpeed(0.);
   }
 
+  double spd;
   if ((_needAngle <= 330.) && (_needAngle >= 0.))
   {
-    double spd;
     double minDelta = 30.;
 
     if (abs(_needAngle - _currentAngle) > _turnEps)

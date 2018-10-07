@@ -82,23 +82,23 @@ SpeedMotor& SpeedMotor::operator= (SpeedMotor &some)
     Serial.print(this->_needSpeed);
     Serial.print(" -> ");
     Serial.print(some._needSpeed);
-    Serial.print(" currentSpeed = ")
+    Serial.print(" currentSpeed = ");
     Serial.print(this->_currentSpeed);
     Serial.print(" -> ");
     Serial.print(some._currentSpeed);
-    Serial.print(" sendSpd = ")
+    Serial.print(" sendSpd = ");
     Serial.print(this->_sendSpd);
     Serial.print(" -> ");
     Serial.print(some._sendSpd);
-    Serial.print(" speedPin = ")
+    Serial.print(" speedPin = ");
     Serial.print(this->_speedPin);
     Serial.print(" -> ");
     Serial.print(some._speedPin);
-    Serial.print(" reversePin = ")
+    Serial.print(" reversePin = ");
     Serial.print(this->_reversePin);
     Serial.print(" -> ");
     Serial.print(some._reversePin);
-    Serial.println("and OptoSensor")
+    Serial.println("and OptoSensor");
   #endif
 
   this->_needSpeed = some._needSpeed;

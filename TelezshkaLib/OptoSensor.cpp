@@ -59,7 +59,7 @@ OptoSensor& OptoSensor::operator= (OptoSensor &some)
       Serial.print(this->_stepTime);
       Serial.print(" -> ");
       Serial.print(some._stepTime);
-      Serial.println(" and ODOMETER")
+      Serial.println(" and ODOMETER");
   #endif
       
   this->_pin = some._pin;
