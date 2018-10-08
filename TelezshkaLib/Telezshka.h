@@ -8,6 +8,7 @@
 #endif
 
 #include "Wheel.h"
+#include "defines.h"
 
 const int numberOfWheels = 3;
 

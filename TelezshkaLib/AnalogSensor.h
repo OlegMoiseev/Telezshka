@@ -7,6 +7,8 @@
   #include <WProgram.h>
 #endif
 
+#include "defines.h"
+
 class AnalogSensor
 {
   protected:

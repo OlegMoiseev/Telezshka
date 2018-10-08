@@ -6,7 +6,9 @@ Wheel::Wheel()
   _needDistance(0),
   _wheelOdometer(_rollMotor._opto._odometer)
 {
-
+  #ifdef WHEEL
+    Serial.println("WHEEL init empty");
+  #endif
 }
 
 Wheel::Wheel(int pinsForWheel [6])
@@ -16,16 +18,31 @@ Wheel::Wheel(int pinsForWheel [6])
   _needDistance(0),
   _wheelOdometer(_rollMotor._opto._odometer)
 {
-
+  #ifdef WHEEL
+    Serial.println("WHEEL init with turnMotor, rollMotor, needDistance = 0, wheelOdometer");
+  #endif
 }
 
 bool Wheel::isTurnReached()
 {
+  #ifdef WHEEL
+    Serial.println("WHEEL called isTurnReached");
+  #endif
+
   return _turnMotor.isAngleReached();
 }
 
 void Wheel::setMove(double angle, double spd, double distance)
 {
+  #ifdef WHEEL
+    Serial.print("WHEEL called setMove and angle = ");
+    Serial.print(angle);
+    Serial.print(" speed = ");
+    Serial.print(spd);
+    Serial.print(" distance = ");
+    Serial.println(distance);
+  #endif
+
   _turnMotor.setAngle(angle);
   _rollMotor.setSpd(spd);
   _needDistance = distance;
@@ -33,11 +50,19 @@ void Wheel::setMove(double angle, double spd, double distance)
 
 double Wheel::deltaDistance()
 {
+  #ifdef WHEEL
+    Serial.println("WHEEL called deltaDistance");
+  #endif
+
   return abs(_needDistance - _rollMotor._opto._odometer.getDistance());
 }
 
 Array <double, 2> Wheel::wheelCurrentPosition()
 {
+  #ifdef WHEEL
+    Serial.println("WHEEL called wheelCurrentPosition");
+  #endif
+
   Array <double, 2> current;
   current.at(0) = _wheelOdometer.getDistance();
   current.at(1) = _turnMotor.getAngleNow();
@@ -46,6 +71,10 @@ Array <double, 2> Wheel::wheelCurrentPosition()
 
 void Wheel::moveWheel(bool turning)
 {
+  #ifdef WHEEL
+    Serial.println("WHEEL called moveWheel");
+  #endif
+
   _turnMotor.standAngle();
   if (turning)
   {
@@ -63,11 +92,19 @@ void Wheel::moveWheel(bool turning)
 
 bool Wheel::isDistReached()
 {
+  #ifdef WHEEL
+    Serial.println("WHEEL called isDistReached");
+  #endif
+
   return deltaDistance() <= 5.;
 }
 
 Wheel& Wheel::operator= (Wheel &&some)
 {
+  #ifdef WHEEL
+    Serial.println("WHEEL called operator=");
+  #endif
+
   this->_wheelOdometer = some._wheelOdometer;
   this->_turnMotor = some._turnMotor;
   this->_rollMotor = some._rollMotor;

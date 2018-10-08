@@ -7,8 +7,10 @@
   #include <WProgram.h>
 #endif
 
+
 #include "Motor.h"
 #include "Potentiometer.h"
+#include "defines.h"
 
 class AngleMotor : public Motor
 {

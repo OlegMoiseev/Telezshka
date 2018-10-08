@@ -6,18 +6,19 @@ int pFW3 [6] = {30, A3, 7, 27, 4, 24};
 
 double xyz [3 * numberOfWheels];
 
-Telezshka telega(pFW1, pFW2, pFW3);
- 
-// 30.0 0.0 0.0 -30.0 0.0 0.0 -90.0 0.0 0.0
-// 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-// 0.0 150.0 500.0 0.0 150.0 500.0 0.0 150.0 500.0
+Telezshka *telega = nullptr;
 
 void setup()
 {
   Serial.begin(9600);
   Serial.setTimeout(100);
   Serial.println("Started");
+  telega = new Telezshka(pFW1, pFW2, pFW3);
 }
+ 
+// 30.0 0.0 0.0 -30.0 0.0 0.0 -90.0 0.0 0.0
+// 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+// 0.0 150.0 500.0 0.0 150.0 500.0 0.0 150.0 500.0
 
 void loop()
 {   
@@ -28,17 +29,17 @@ void loop()
         xyz[i] = Serial.parseFloat(); 
       }
       
-      telega.setGo(xyz);
+      telega->setGo(xyz);
       
       if ((xyz[2] + xyz[5] + xyz[8]) < 1.)
       {
-        telega.telezshkaCurrentPosition();
+        telega->telezshkaCurrentPosition();
       }
     }
     
-    telega.goTo();
+    telega->goTo();
     
-    if (telega.isReachedDistance())
+    if (telega->isReachedDistance())
     {
       Serial.print("done");
     }
