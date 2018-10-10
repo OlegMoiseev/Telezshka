@@ -5,6 +5,8 @@ SpeedMotor::SpeedMotor(const int optoPin, const int speedPin, const int reverseP
   _opto(OptoSensor(optoPin)),
   Motor(speedPin, reversePin),
   _needSpeed(0.),
+  _maxSpeed(200.),
+  _numberOfStaps(500.),
   _sendSpd(0.)
 {
   #ifdef SPEEDMOTOR
@@ -52,20 +54,12 @@ void SpeedMotor::standSpeed()
     double delta = abs(_needSpeed) - _opto.getSpeed();
     if (abs(delta) > 10.)
     {
-      _sendSpd += (255. / 200.) * delta / 500.;  // 200 - maxSpeed 2.0 - koef PID
+      _sendSpd += (255. / _maxSpeed) * delta / _numberOfStaps.;  // 200 - maxSpeed 2.0 - koef PID
       if (_sendSpd < 0.)
       {
         _sendSpd = 50.;
       }
-      if (_needSpeed > 0.)
-      {
-        setRotationSpeed(_sendSpd);
-      }
-      else
-      {
-        _sendSpd = -_sendSpd;
-        setRotationSpeed(_sendSpd);
-      }
+      _needSpeed > 0. ? setRotationSpeed(_sendSpd) : setRotationSpeed(-_sendSpd);
     }
   }
 
