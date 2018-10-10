@@ -2,7 +2,7 @@
 // #define ANGLEMOTOR
 // #define DIGITALSENSOR
 // #define MOTOR
-#define ODOMETER
+// #define ODOMETER
 // #define OPTOSENSOR
 // #define POTENTIOMETER
 // #define SPEEDMOTOR

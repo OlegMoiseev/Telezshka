@@ -54,7 +54,7 @@ void SpeedMotor::standSpeed()
     double delta = abs(_needSpeed) - _opto.getSpeed();
     if (abs(delta) > 10.)
     {
-      _sendSpd += (255. / _maxSpeed) * delta / _numberOfStaps.;  // 200 - maxSpeed 2.0 - koef PID
+      _sendSpd += (255. / _maxSpeed) * delta / _numberOfStaps;  // 200 - maxSpeed 2.0 - koef PID
       if (_sendSpd < 0.)
       {
         _sendSpd = 50.;
