@@ -17,15 +17,15 @@ const int DOUT5 = 9;  //3 + 6 == 2 * i + 3
 
 double epsForce = 3.0;
 bool check = true;
-const int emergencyStop = 12;
+const int emergencyStop = 0;
 Array<HX711, 9> tenzo;
 
 const int numSensors = 7;
 
 void setup()
 {
-  Serial.begin(9600);
-  Serial.setTimeout(0);
+//  Serial.begin(9600);
+//  Serial.setTimeout(100);
 
   for (int i = 0; i < numSensors; ++i)
   {
@@ -61,7 +61,7 @@ void tenzo_dat()
       allStop = true;
     }
   }
-  Serial.println(out);
+//  Serial.println(out);
   if (!allStop)
   {
     digitalWrite(emergencyStop, HIGH);
@@ -72,23 +72,23 @@ void contact(int num, double d1, double d2, int sng)
 {
   if (d2 < 0)
   {
-    Serial.print("near with ");
-    Serial.print(num);
-    Serial.print(" tenzo, force is ");
-    Serial.println(d1 - d2);
+//    Serial.print("near with ");
+//    Serial.print(num);
+//    Serial.print(" tenzo, force is ");
+//    Serial.println(d1 - d2);
   }
   else
   {
-    Serial.print("between ");
-    Serial.print(num);
-    Serial.print(" and ");
-    Serial.print(num + sng);
-    Serial.print(" tenzo's, force is ");
-    Serial.print(d1 + d2);
-    Serial.print("on distance ");
-    Serial.print( (d1 / (d1 + d2)) * 47.0);  //47 - distance between  tenzo
-    Serial.print(" sm from tenzo ");
-    Serial.println(num);
+//    Serial.print("between ");
+//    Serial.print(num);
+//    Serial.print(" and ");
+//    Serial.print(num + sng);
+//    Serial.print(" tenzo's, force is ");
+//    Serial.print(d1 + d2);
+//    Serial.print("on distance ");
+//    Serial.print( (d1 / (d1 + d2)) * 47.0);  //47 - distance between  tenzo
+//    Serial.print(" sm from tenzo ");
+//    Serial.println(num);
   }
 }
 
