@@ -10,7 +10,7 @@ Telezshka *telega = nullptr;
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(2000000);
   Serial.setTimeout(100);
   Serial.println("Started");
   telega = new Telezshka(pFW1, pFW2, pFW3);
@@ -19,6 +19,8 @@ void setup()
 // 30.0 0.0 0.0 -30.0 0.0 0.0 -90.0 0.0 0.0
 // 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 // 0.0 150.0 500.0 0.0 150.0 500.0 0.0 150.0 500.0
+// 0.0 255.0 100.0 0.0 255.0 100.0 0.0 255.0 100.0
+// 0.0 -255.0 100.0 0.0 -255.0 100.0 0.0 -255.0 100.0
 
 void loop()
 {   
