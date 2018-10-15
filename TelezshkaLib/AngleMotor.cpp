@@ -83,6 +83,7 @@ double AngleMotor::getAngleNow()
 {
   #ifdef ANGLEMOTOR
     Serial.print("ANGLEMOTOR called getAngleNow with currentAngle = ");
+
     Serial.println(_currentAngle);
   #endif
 
