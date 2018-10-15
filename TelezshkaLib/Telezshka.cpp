@@ -34,6 +34,13 @@ Telezshka::Telezshka(int pinsForWheel1 [6], int pinsForWheel2 [6], int pinsForWh
   _wheels.at(1) = Wheel(pinsForWheel2);
   _wheels.at(2) = Wheel(pinsForWheel3);
   
+
+  for (int i = 0; i < numberOfWheels; ++i)
+  {
+    _stopArray[3 * i] = 0.;
+    _stopArray[3 * i + 1] = 0.;
+    _stopArray[3 * i + 2] = 0.; 
+  }
 }
 
 
@@ -85,7 +92,8 @@ Array<double, 2 * numberOfWheels> Telezshka::telezshkaCurrentPosition()
   Array<double, 2 * numberOfWheels> positions;
   Array<double, 2> curWheel;
   
-  for(int i = 0; i < 2 * numberOfWheels; i += 2)
+
+  for(int i = 0; i < numberOfWheels; i += 2)
   {
     curWheel = _wheels.at(i).wheelCurrentPosition();
   
@@ -132,15 +140,10 @@ void Telezshka::stopMove()
 {
   #ifdef TELEZSHKA
     Serial.println("TELEZSHKA called stopMove");
-  #endif 
 
-  Array<double, 2*numberOfWheels> ar = telezshkaCurrentPosition();
-
-  for (int i = 0; i < 3 * numberOfWheels; ++i)
-  {
-    _stopArray[i] = 0.;
-  }
+  #endif
 
   setGo(_stopArray);
   goTo();
+  telezshkaCurrentPosition();
 }

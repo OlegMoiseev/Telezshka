@@ -6,34 +6,26 @@ int pFW3 [6] = {30, A3, 7, 27, 4, 24};
 
 double xyz [3 * numberOfWheels];
 
-const int emergencyStop = 2;
 
 Telezshka *telega = nullptr;
 
-
-void emergencyStopTelezshka()
-{
-  telega->stopMove();   
-}
-
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(2000000);
   Serial.setTimeout(100);
   Serial.println("Started");
-  attachInterrupt(emergencyStop, emergencyStopTelezshka, FALLING);
   telega = new Telezshka(pFW1, pFW2, pFW3);
 }
  
 // 30.0 0.0 0.0 -30.0 0.0 0.0 -90.0 0.0 0.0
 // 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 // 0.0 150.0 500.0 0.0 150.0 500.0 0.0 150.0 500.0
-//0.0 255.0 100.0 0.0 255.0 100.0 0.0 255.0 100.0 
-// 0.0 255.0 1000.0 0.0 255.0 1000.0 0.0 255.0 1000.0
+
+// 0.0 255.0 100.0 0.0 255.0 100.0 0.0 255.0 100.0
 // 0.0 -255.0 100.0 0.0 -255.0 100.0 0.0 -255.0 100.0
 
 void loop()
-{           
+{   
     if (Serial.available() > 0)
     {
       for (int i = 0; i < 9; ++i)
