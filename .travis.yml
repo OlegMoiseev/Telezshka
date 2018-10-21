@@ -16,6 +16,7 @@ install:
   - sudo make install
   - cd ..
   - cd Telezshka
+  - ls -l
   - sudo git clone https://github.com/janelia-arduino/Array.git /usr/share/arduino/libraries/Array
   
 script: 
