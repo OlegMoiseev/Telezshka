@@ -6,6 +6,7 @@ compiler:
 install:
   # arduino
   - sudo apt-get install arduino
+  - sudo easy_install Jinja2
   # ino
   - my_github=${PWD##*/}  
   - cd ..
