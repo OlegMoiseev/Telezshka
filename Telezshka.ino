@@ -6,14 +6,22 @@ int pFW3 [6] = {30, A3, 7, 27, 4, 24};
 
 double xyz [3 * numberOfWheels];
 
+bool interruption = false;
 
 Telezshka *telega = nullptr;
 
+void emergencyStopTelezshka()
+{
+  interruption = true;
+  telega->stopMove();   
+}
+
 void setup()
 {
-  Serial.begin(2000000);
+  Serial.begin(9600);
   Serial.setTimeout(100);
   Serial.println("Started");
+  attachInterrupt(emergencyStop, emergencyStopTelezshka, FALLING);
   telega = new Telezshka(pFW1, pFW2, pFW3);
 }
  
@@ -43,8 +51,9 @@ void loop()
     
     telega->goTo();
     
-    if (telega->isReachedDistance())
+    if (!interruption && telega->isReachedDistance())
     {
       Serial.print("done");
     }
+    interruption = false;
 }
