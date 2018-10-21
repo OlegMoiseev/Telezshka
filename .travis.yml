@@ -14,8 +14,7 @@ install:
   - sudo make install
   - cd ..
   - cd $my_github
-
+  - sudo git clone https://github.com/janelia-arduino/Array.git /usr/share/arduino/libraries/Array
+  
 script: 
   - ino build
-  # Check if resulting file exists
-  - if [ -f .build/uno/firmware.hex ]; then return 0; else return 1; fi
