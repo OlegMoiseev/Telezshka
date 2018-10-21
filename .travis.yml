@@ -7,6 +7,8 @@ install:
   # arduino
   - sudo apt-get install arduino
   - sudo easy_install Jinja2
+  - sudo easy_install ino
+  - sudo easy_install glob2
   # ino
   - my_github=${PWD##*/}  
   - cd ..
