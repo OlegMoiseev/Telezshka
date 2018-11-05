@@ -6,6 +6,8 @@ int pFW3 [6] = {30, A3, 7, 27, 4, 24};
 
 double xyz [3 * numberOfWheels];
 
+const int emergencyStop = 2;
+
 bool interruption = false;
 
 Telezshka *telega = nullptr;
