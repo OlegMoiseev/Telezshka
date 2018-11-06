@@ -83,25 +83,23 @@ void Telezshka::goTo()
   }
 }
 
-Array<double, 2 * numberOfWheels> Telezshka::telezshkaCurrentPosition()
+void Telezshka::updateCurrentPosition()
 {
   #ifdef TELEZSHKA
     Serial.println("TELEZSHKA called telezshkaCurrentPosition");
   #endif
 
-  Array<double, 2 * numberOfWheels> positions;
   Array<double, 2> curWheel;
-  
 
-  for(int i = 0; i < numberOfWheels; i += 2)
+  int j = 0;
+  for(int i = 0; i < numberOfWheels; ++i)
   {
     curWheel = _wheels.at(i).wheelCurrentPosition();
   
-    positions.at(i) = curWheel.at(0);
-    positions.at(i + 1) = curWheel.at(1);
+    _positions[j] = curWheel.at(0);
+    _positions[j + 1] = curWheel.at(1);
+    j += 2;
   }
-  
-  return positions;
 }
 
 bool Telezshka::isReachedDistance()
@@ -145,5 +143,4 @@ void Telezshka::stopMove()
 
   setGo(_stopArray);
   goTo();
-  telezshkaCurrentPosition();
 }

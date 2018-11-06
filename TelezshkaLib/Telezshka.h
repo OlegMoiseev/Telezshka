@@ -19,13 +19,15 @@ class Telezshka
     bool _doneMove;
     bool _doneTurn;
     double _stopArray [3 * numberOfWheels];
+    
   public:
+    double _positions [2 * numberOfWheels];
     Telezshka(int pinsForWheel1 [6], int pinsForWheel2 [6], int pinsForWheel3 [6]);
     Telezshka();
     void setGo(double valuesMove [3 * numberOfWheels]);
     void goTo();
     void stopMove();
-    Array<double, 2 * numberOfWheels> telezshkaCurrentPosition();
+    void updateCurrentPosition();
     bool isReachedDistance();
     
     Telezshka& operator= (Telezshka &some);

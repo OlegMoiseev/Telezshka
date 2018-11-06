@@ -37,7 +37,7 @@ double Odometer::getDistance()
 		Serial.print("ODOMETER called getDistance and distance = ");
 		Serial.println(_distance);
 	#endif
-
+		
   return _distance;
 }
 

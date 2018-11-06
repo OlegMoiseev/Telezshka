@@ -42,7 +42,7 @@ void Wheel::setMove(double angle, double spd, double distance)
     Serial.print(" distance = ");
     Serial.println(distance);
   #endif
-
+    
   _turnMotor.setAngle(angle);
   _rollMotor.setSpd(spd);
   _needDistance = distance;
@@ -64,8 +64,9 @@ Array <double, 2> Wheel::wheelCurrentPosition()
   #endif
 
   Array <double, 2> current;
-  current.at(0) = _wheelOdometer.getDistance();
+  current.at(0) = _rollMotor._opto._odometer.getDistance();
   current.at(1) = _turnMotor.getAngleNow();
+
   return current;
 }
 
