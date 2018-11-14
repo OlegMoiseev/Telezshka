@@ -38,6 +38,7 @@ void printPositions(Telezshka* telega, int numberOfWheels)
     Serial.print(telega->_positions[i]);
     Serial.print(' ');
   }
+  Serial.println();
 }
 
 void loop()
@@ -69,7 +70,7 @@ void loop()
    
     if (!interruption && telega->isReachedDistance())
     {
-      Serial.print("done");
+      Serial.println("done");
     }
 
     interruption = false;
