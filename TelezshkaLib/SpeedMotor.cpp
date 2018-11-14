@@ -30,6 +30,10 @@ void SpeedMotor::stopMove()
   #endif
 
   setRotationSpeed(0.);
+}
+
+void SpeedMotor::reset()
+{
   _opto._odometer.resetOdometer();
 }
 

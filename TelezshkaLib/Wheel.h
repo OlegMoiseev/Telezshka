@@ -18,8 +18,8 @@ class Wheel
   private:
     AngleMotor _turnMotor;
     SpeedMotor _rollMotor;
-    double _needDistance;
     Odometer _wheelOdometer;
+    double _needDistance;
   public:
     Wheel();
     Wheel(int pinsForWheel [6]);

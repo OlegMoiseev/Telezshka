@@ -42,7 +42,7 @@ void Wheel::setMove(double angle, double spd, double distance)
     Serial.print(" distance = ");
     Serial.println(distance);
   #endif
-    
+  _rollMotor.reset();
   _turnMotor.setAngle(angle);
   _rollMotor.setSpd(spd);
   _needDistance = distance;
@@ -53,7 +53,7 @@ double Wheel::deltaDistance()
   #ifdef WHEEL
     Serial.println("WHEEL called deltaDistance");
   #endif
-
+    Serial.println(abs(_needDistance - _rollMotor._opto._odometer.getDistance()));
   return abs(_needDistance - _rollMotor._opto._odometer.getDistance());
 }
 
@@ -82,7 +82,6 @@ void Wheel::moveWheel(bool turning)
     if (isDistReached())
     {
       _rollMotor.stopMove();
-      _needDistance = 0;
     }
     else
     {

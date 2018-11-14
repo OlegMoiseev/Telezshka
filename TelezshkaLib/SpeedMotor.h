@@ -26,6 +26,7 @@ class SpeedMotor : public Motor
     void standSpeed();
     void setSpd(double spd);
     void stopMove();
+    void reset();
     
     SpeedMotor& operator= (SpeedMotor &some);
 };
