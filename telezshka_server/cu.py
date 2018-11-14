@@ -8,19 +8,23 @@ def create_conn(ip_in: str, port_in: int):
 
 
 ip = ""
-port = 9092
+port = 9093
 to_server_sock = create_conn(ip, port)
 
 
 while True:
+
     in_str = input("Send to server:")
     to_server_sock.send(in_str.encode())
-    in_str = input("Send to server:")
-    to_server_sock.send(in_str.encode())
-    
-    answer = to_server_sock.recv(128).decode()
-    print("Received:", answer)
+
+    while True:
+        answer = to_server_sock.recv(128).decode()
+        print("Received:", answer)
+        if 'done' in answer:
+            break
+
     if answer == 'stop':
         break
 
 to_server_sock.close()
+# 1 30.0 150.0 500.0 30.0 150.0 500.0 30.0 150.0 500.0

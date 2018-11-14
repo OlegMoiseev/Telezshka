@@ -2,6 +2,6 @@
     "RobotServer": {
         "IPAddress": "",
         "port": "9093",
-        "COMPort": "/dev/cu.wchusbserial1420"
+        "COMPort": "/dev/ttyUSB0"
     }
 }

@@ -11,23 +11,26 @@ class Server:
         self.sock = socket.socket()
         self.sock.bind((ip_server, port_server))
         self.sock.listen(1)
-        self.in_port, self.addr_from = self.sock.accept()
+        self.connection, self.addr_from = self.sock.accept()
         print("Server started!")
-        print("Connected CU by", self.in_port, ":", self.addr_from)
+        print("Connected CU by", self.connection, ":", self.addr_from)
 
     def report_done(self):
-        self.sock.send("1 ".encode())
+        self.connection.send("done".encode())
 
     def report_error(self, num):
-        self.sock.send((num + " error").encode())
+        self.connection.send((num + " error").encode())
 
     def report_invalid(self):
-        self.sock.send("invalid string".encode())
+        self.connection.send("invalid string".encode())
+
+    def report_info(self, data):
+        self.connection.send(data.encode())
 
     def two_command_move(self, obj):
-        rot_angle = self.sock.recv(128).decode()
+        rot_angle = self.connection.recv(128).decode()
         print("From CU: ", rot_angle)
-        go_line = self.sock.recv(128).decode()
+        go_line = self.connection.recv(128).decode()
         print("From CU: ", go_line)
 
         if rot_angle == self.zero_str and go_line == self.zero_str:
@@ -59,22 +62,25 @@ class Server:
         return 0
 
     def one_command_move(self, obj):
-        go_line = self.sock.recv(128).decode()[2:]
+        go_line = self.connection.recv(128).decode()[2:]
         print("From CU: ", go_line)
-        if go_line == self.zero_str:
-            self.report_done()
+        # if go_line == self.zero_str:
+        #     self.report_done()
 
         if obj.validate_str(go_line):
             obj.send_to(go_line)
 
-            ans = obj.recv_from()
+            tracking = True
+            while tracking:
+                ans = obj.recv_from()
 
-            if "done" in ans:
-                self.report_done()
+                if "done" in ans:
+                    tracking = False
+                    self.report_done()
 
-            else:
-                self.report_error("1")
-                return 1
+                else:
+                    self.report_info(ans)
+
         else:
             self.report_invalid()
             return 2
@@ -82,7 +88,7 @@ class Server:
         return 0
 
     def stop(self):
-        self.sock.close()
+        self.connection.close()
 
     def start(self, obj):
         try:
@@ -104,7 +110,7 @@ class Telega:
 
     def recv_from(self):
         # time.sleep(1)
-        ans = self.com.read(4).decode()
+        ans = self.com.readline().decode()
         # ans = "done"
         print("Recv from telega:", ans.encode())
         return ans
@@ -141,6 +147,7 @@ while True:
 
     server_for_cu.stop()
     print("Connection aborted by Danya")
-    time.sleep(5)
+    break
+    # time.sleep(5)
 
 telega.stop()

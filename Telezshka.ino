@@ -29,6 +29,17 @@ void setup()
   telega = new Telezshka(pFW1, pFW2, pFW3);
 }
 
+
+void printPositions(Telezshka* telega, int numberOfWheels)
+{
+  telega->updateCurrentPosition();
+  for(int i = 0; i < 2*numberOfWheels; ++i)
+  {
+    Serial.print(telega->_positions[i]);
+    Serial.print(' ');
+  }
+}
+
 void loop()
 {   
     ++iterations;
@@ -44,25 +55,14 @@ void loop()
       if ((xyz[2] + xyz[5] + xyz[8]) < 1.)
       {
         iterations = 0;
-        telega->updateCurrentPosition();
-        for(int i = 0; i < 2*numberOfWheels; ++i)
-        {
-          Serial.print(telega->_positions[i]);
-          Serial.print(' ');
-        }
+        printPositions(telega, numberOfWheels);
       }
     }
 
     if(iterations % 100 == 0)
       {
         iterations = 0;
-        telega->updateCurrentPosition();
-        for(int i = 0; i < 2*numberOfWheels; ++i)
-        {
-          Serial.print(telega->_positions[i]);
-          Serial.print(' ');
-        }
-//        Serial.println();
+        printPositions(telega, numberOfWheels);
       }
       
     telega->goTo();
