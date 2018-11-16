@@ -7,7 +7,7 @@
   #include <WProgram.h>
 #endif
 
-#include "defines.h"
+#include "Defines.h"
 
 class Odometer
 {

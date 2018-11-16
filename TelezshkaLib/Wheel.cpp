@@ -1,4 +1,5 @@
 #include "Wheel.h"
+
 Wheel::Wheel()
   :
   _turnMotor(44, 45, 46),//pins what we don't use
@@ -53,7 +54,6 @@ double Wheel::deltaDistance()
   #ifdef WHEEL
     Serial.println("WHEEL called deltaDistance");
   #endif
-    Serial.println(abs(_needDistance - _rollMotor._opto._odometer.getDistance()));
   return abs(_needDistance - _rollMotor._opto._odometer.getDistance());
 }
 

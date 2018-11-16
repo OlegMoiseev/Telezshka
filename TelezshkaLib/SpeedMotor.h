@@ -9,7 +9,7 @@
 
 #include "Motor.h"
 #include "OptoSensor.h"
-#include "defines.h"
+#include "Defines.h"
 
 class SpeedMotor : public Motor
 {
