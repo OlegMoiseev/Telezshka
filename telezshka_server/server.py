@@ -7,16 +7,18 @@ import time
 class Server:
     def __init__(self, ip_server: str, port_server: int):
         self.zero_str = "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
-
+	
         self.sock = socket.socket()
         self.sock.bind((ip_server, port_server))
         self.sock.listen(1)
-        self.connection, self.addr_from = self.sock.accept()
         print("Server started!")
+
+    def create_con(self):
+        self.connection, self.addr_from = self.sock.accept()
         print("Connected CU by", self.connection, ":", self.addr_from)
 
     def report_done(self):
-        self.connection.send("done".encode())
+        self.connection.send("-1.0 -1.0 -1.0 -1.0 -1.0 -1.0".encode())
 
     def report_error(self, num):
         self.connection.send((num + " error").encode())
@@ -101,7 +103,7 @@ class Server:
 
 class Telega:
     def __init__(self, com_port: str):
-        self.com = serial.Serial(com_port, baudrate=9600, timeout=120)
+        self.com = serial.Serial(com_port, baudrate=115200, timeout=120)
         # pass
 
     def send_to(self, in_str: str):
@@ -116,9 +118,9 @@ class Telega:
         return ans
 
     def recv_init(self):
-        ans = self.com.readline().decode()
+        ans = self.com.readline()
         # ans = "Init completed"
-        print("Recv from telega:", ans.encode())
+        # print("Recv from telega:", ans.encode())
         return ans
 
     def stop(self):
@@ -141,13 +143,17 @@ port = int(config_json["RobotServer"]["port"])
 
 print("Application started!")
 
+server_for_cu = Server(ip, port)
+
 while True:
-    server_for_cu = Server(ip, port)
-    server_for_cu.start(telega)
+    try:
+        server_for_cu.create_con()
+        server_for_cu.start(telega)
 
-    server_for_cu.stop()
-    print("Connection aborted by Danya")
-    break
+        server_for_cu.stop()
+        print("Connection aborted by Danya")
     # time.sleep(5)
-
+    except:
+        server_for_cu.stop()
+    print("except")
 telega.stop()

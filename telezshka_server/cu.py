@@ -7,7 +7,7 @@ def create_conn(ip_in: str, port_in: int):
     return sock
 
 
-ip = ""
+ip = "192.168.1.100"
 port = 9093
 to_server_sock = create_conn(ip, port)
 
