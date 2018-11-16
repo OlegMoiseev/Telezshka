@@ -7,7 +7,6 @@ import time
 class Server:
     def __init__(self, ip_server: str, port_server: int):
         self.zero_str = "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
-	
         self.sock = socket.socket()
         self.sock.bind((ip_server, port_server))
         self.sock.listen(1)
@@ -71,16 +70,35 @@ class Server:
 
         if obj.validate_str(go_line):
             obj.send_to(go_line)
+            # -----------------------------
+            # CRUTCH
+            go = go_line.split()
+            sign_negative = [False, False, False]
+            sign_negative[0] = True if go[1][0] == '-' else False
+            sign_negative[1] = True if go[4][0] == '-' else False
+            sign_negative[2] = True if go[7][0] == '-' else False
+
+            # -----------------------------
+
+
 
             tracking = True
             while tracking:
                 ans = obj.recv_from()
-
                 if "done" in ans:
                     tracking = False
                     self.report_done()
 
                 else:
+                    # -----------------------------
+                    # CRUTCH
+                    if sign_negative[0]:
+                        ans[1] *= -1
+                    if sign_negative[1]:
+                        ans[3] *= -1
+                    if sign_negative[2]:
+                        ans[5] *= -1
+                    # -----------------------------
                     self.report_info(ans)
 
         else:
