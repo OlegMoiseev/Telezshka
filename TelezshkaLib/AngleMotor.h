@@ -10,7 +10,7 @@
 
 #include "Motor.h"
 #include "Potentiometer.h"
-#include "defines.h"
+#include "Defines.h"
 
 class AngleMotor : public Motor
 {
