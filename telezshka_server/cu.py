@@ -20,7 +20,7 @@ while True:
     while True:
         answer = to_server_sock.recv(128).decode()
         print("Received:", answer)
-        if 'done' in answer:
+        if '-1.0 -1.0 -1.0 -1.0 -1.0 -1.0' in answer:
             break
 
     if answer == 'stop':
@@ -28,3 +28,4 @@ while True:
 
 to_server_sock.close()
 # 1 30.0 150.0 500.0 30.0 150.0 500.0 30.0 150.0 500.0
+# 1 30.0 -150.0 500.0 30.0 -150.0 500.0 30.0 -150.0 500.0
