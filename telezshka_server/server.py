@@ -77,7 +77,6 @@ class Server:
             sign_negative[0] = True if go[1][0] == '-' else False
             sign_negative[1] = True if go[4][0] == '-' else False
             sign_negative[2] = True if go[7][0] == '-' else False
-            print("Negative array: ", sign_negative)
             # -----------------------------
 
 
@@ -92,12 +91,20 @@ class Server:
                 else:
                     # -----------------------------
                     # CRUTCH
+                    tmp = ans.split()
+
                     if sign_negative[0]:
-                        ans[1] *= -1
+                        tmp[1] = -1 * int(tmp[1])
                     if sign_negative[1]:
-                        ans[3] *= -1
+                        tmp[3] = -1 * int(tmp[3])
                     if sign_negative[2]:
-                        ans[5] *= -1
+                        tmp[5] = -1 * int(tmp[5])
+
+                    ans = ""
+                    for i in range(len(tmp)):
+                        ans += str(tmp[i]) + " "
+
+                    ans = ans[:-1]
                     print(ans)
                     # -----------------------------
                     self.report_info(ans)
