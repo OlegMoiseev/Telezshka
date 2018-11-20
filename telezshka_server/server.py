@@ -17,7 +17,7 @@ class Server:
         print("Connected CU by", self.connection, ":", self.addr_from)
 
     def report_done(self):
-        self.connection.send("-1.0 -1.0 -1.0 -1.0 -1.0 -1.0".encode())
+        self.connection.send("0.0 0.0 0.0 0.0 0.0 0.0".encode())
 
     def report_error(self, num):
         self.connection.send((num + " error").encode())
