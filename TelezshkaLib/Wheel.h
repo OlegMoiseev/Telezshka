@@ -23,7 +23,7 @@ class Wheel
   public:
     Wheel();
     Wheel(int pinsForWheel [6]);
-    void setMove(double spd, double angle, double distance);
+    void setMove(double spd, double angle, double distance, bool keyInterruption);
     Array <double, 2> wheelCurrentPosition();
     bool isTurnReached();
     void moveWheel(bool turning);

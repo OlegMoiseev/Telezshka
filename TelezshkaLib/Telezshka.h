@@ -18,6 +18,7 @@ class Telezshka
     Array<Wheel, numberOfWheels> _wheels;
     bool _doneMove;
     bool _doneTurn;
+    bool _keyInterruption;
     double _stopArray [3 * numberOfWheels];
     
   public:

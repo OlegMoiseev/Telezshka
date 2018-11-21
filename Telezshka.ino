@@ -8,25 +8,31 @@ double xyz [3 * numberOfWheels];
 
 unsigned long int iterations = 0;
 
-const int emergencyStop = 2;
+const int interruptPin = 18;
 
 bool interruption = false;
 bool wrIte = false;
+bool telegaMoving = false;
 
 Telezshka *telega = nullptr;
 
-//void emergencyStopTelezshka()
-//{
-//  interruption = true;
-//  telega->stopMove();   
-//}
+void emergencyStopTelezshka()
+{
+//  Serial.println("iIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
+  interruption = true;
+  if (telegaMoving)
+  {
+    telega->stopMove(); 
+  }
+}
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.setTimeout(100);
   Serial.println("Started");
-//  attachInterrupt(emergencyStop, emergencyStopTelezshka, FALLING);
+  pinMode(interruptPin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(interruptPin), emergencyStopTelezshka, FALLING);
   telega = new Telezshka(pFW1, pFW2, pFW3);
 }
 
@@ -47,8 +53,11 @@ void loop()
     ++iterations;
     if (Serial.available() > 0)
     {
+      interruption = false;
+      telegaMoving = true;
       wrIte = 1;
       iterations = 0; 
+      
       for (int i = 0; i < 9; ++i)
       {
         xyz[i] = Serial.parseFloat();
@@ -70,16 +79,23 @@ void loop()
     }
     
     telega->goTo();
-   
+
     if (!interruption && telega->isReachedDistance())
     {
       wrIte = 0;
       iterations = 0;
+      telegaMoving = false;
       printPositions(telega, numberOfWheels); 
       Serial.println("done");
     }
-
-    interruption = false;
+    if (interruption && telega->isReachedDistance())
+    {
+        wrIte = 0;
+        iterations = 0;
+        telegaMoving = false;
+        printPositions(telega, numberOfWheels); 
+        Serial.println("1");
+    }
 }
 
 // 30.0 -200.0 200.0 -30.0 200.0 200.0 -90.0 -200.0 200.0

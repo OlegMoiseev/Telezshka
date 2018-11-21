@@ -3,7 +3,8 @@
 Telezshka::Telezshka(int pinsForWheel1 [6], int pinsForWheel2 [6], int pinsForWheel3 [6])
   :
   _doneMove(false),
-  _doneTurn(false)
+  _doneTurn(false),
+  _keyInterruption(false)
 {
   #ifdef TELEZSHKA
     Serial.print("TELEZSHKA init with arrays of wheels and stopArray with pins w1 = [ ");
@@ -59,9 +60,25 @@ void Telezshka::setGo(double valuesMove [3 * numberOfWheels])
   _doneMove = true;
   _doneTurn = true;
 
+  double sum = 0;
+  
+  for(int i = 0; i < 3 * numberOfWheels; ++i)
+  {
+    sum += abs(valuesMove[i]);
+  }
+
   for (int i = 0; i < 3 * numberOfWheels; ++i)
   {
-    _wheels.at(i).setMove(valuesMove[i * 3], valuesMove[i * 3 + 1], valuesMove[i * 3 + 2]);
+    if (sum < 1.)
+    {
+      _keyInterruption = true;
+      _wheels.at(i).setMove(valuesMove[i * 3], valuesMove[i * 3 + 1], valuesMove[i * 3 + 2], _keyInterruption);
+    }
+    else
+    {
+      _keyInterruption = false;
+      _wheels.at(i).setMove(valuesMove[i * 3], valuesMove[i * 3 + 1], valuesMove[i * 3 + 2], _keyInterruption);
+    }
   }
 }
 
@@ -108,6 +125,12 @@ bool Telezshka::isReachedDistance()
     Serial.print("TELEZSHKA called isReachedDistance");
   #endif
 
+  if (_doneMove && _keyInterruption)
+  {
+    _doneMove = false;
+    return true;
+  }
+
   bool tmp = true;
   
   for (int i = 0; i < numberOfWheels; ++i)
@@ -138,9 +161,7 @@ void Telezshka::stopMove()
 {
   #ifdef TELEZSHKA
     Serial.println("TELEZSHKA called stopMove");
-
   #endif
-
   setGo(_stopArray);
   goTo();
 }

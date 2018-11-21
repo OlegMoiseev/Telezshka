@@ -15,7 +15,7 @@ const int DOUT4 = 7;  //2 + 5
 const int CLK5 = 8;  //3 + 5 == 2 * i + 2
 const int DOUT5 = 9;  //3 + 6 == 2 * i + 3
 
-double epsForce = 3.0;
+double epsForce = 3.;
 bool check = true;
 const int emergencyStop = 0;
 Array<HX711, 9> tenzo;
@@ -56,9 +56,10 @@ void tenzo_dat()
     
     if (abs(force) > epsForce)
     {
-      //Serial.print("Collision!\t");
+//      Serial.print("Collision!\t");
       digitalWrite(emergencyStop, LOW);
       allStop = true;
+      break;
     }
   }
 //  Serial.println(out);

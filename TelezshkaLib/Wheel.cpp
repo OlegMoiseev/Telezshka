@@ -33,7 +33,7 @@ bool Wheel::isTurnReached()
   return _turnMotor.isAngleReached();
 }
 
-void Wheel::setMove(double angle, double spd, double distance)
+void Wheel::setMove(double angle, double spd, double distance, bool keyInterruption)
 {
   #ifdef WHEEL
     Serial.print("WHEEL called setMove and angle = ");
@@ -43,7 +43,12 @@ void Wheel::setMove(double angle, double spd, double distance)
     Serial.print(" distance = ");
     Serial.println(distance);
   #endif
-  _rollMotor.reset();
+  
+  if (!keyInterruption)
+  {
+    _rollMotor.reset();
+  }
+
   _turnMotor.setAngle(angle);
   _rollMotor.setSpd(spd);
   _needDistance = distance;
