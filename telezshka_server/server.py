@@ -94,17 +94,17 @@ class Server:
                     tmp = ans.split()
 
                     if sign_negative[0]:
-                        tmp[1] = -1 * int(tmp[1])
+                        tmp[0] = -1 * float(tmp[0])
                     if sign_negative[1]:
-                        tmp[3] = -1 * int(tmp[3])
+                        tmp[2] = -1 * float(tmp[2])
                     if sign_negative[2]:
-                        tmp[5] = -1 * int(tmp[5])
+                        tmp[4] = -1 * float(tmp[4])
 
                     ans = ""
                     for i in range(len(tmp)):
                         ans += str(tmp[i]) + " "
 
-                    ans = ans[:-1]
+                    #ans = ans[:-1]
                     print(ans)
                     # -----------------------------
                     self.report_info(ans)
@@ -123,7 +123,8 @@ class Server:
             while True:
                 if self.one_command_move(obj) != 0:
                     break
-        except:
+        except Exception as e:
+            print(e)
             print("Connect aborted by exception")
 
 
