@@ -1,4 +1,5 @@
 #include "Wheel.h"
+
 Wheel::Wheel()
   :
   _turnMotor(44, 45, 46),//pins what we don't use
@@ -32,7 +33,7 @@ bool Wheel::isTurnReached()
   return _turnMotor.isAngleReached();
 }
 
-void Wheel::setMove(double angle, double spd, double distance)
+void Wheel::setMove(double angle, double spd, double distance, bool keyInterruption)
 {
   #ifdef WHEEL
     Serial.print("WHEEL called setMove and angle = ");
@@ -42,7 +43,12 @@ void Wheel::setMove(double angle, double spd, double distance)
     Serial.print(" distance = ");
     Serial.println(distance);
   #endif
-    
+  
+  if (!keyInterruption)
+  {
+    _rollMotor.reset();
+  }
+
   _turnMotor.setAngle(angle);
   _rollMotor.setSpd(spd);
   _needDistance = distance;
@@ -53,7 +59,6 @@ double Wheel::deltaDistance()
   #ifdef WHEEL
     Serial.println("WHEEL called deltaDistance");
   #endif
-
   return abs(_needDistance - _rollMotor._opto._odometer.getDistance());
 }
 
@@ -82,7 +87,6 @@ void Wheel::moveWheel(bool turning)
     if (isDistReached())
     {
       _rollMotor.stopMove();
-      _needDistance = 0;
     }
     else
     {

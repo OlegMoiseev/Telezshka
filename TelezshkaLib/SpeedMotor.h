@@ -9,7 +9,7 @@
 
 #include "Motor.h"
 #include "OptoSensor.h"
-#include "defines.h"
+#include "Defines.h"
 
 class SpeedMotor : public Motor
 {
@@ -26,6 +26,7 @@ class SpeedMotor : public Motor
     void standSpeed();
     void setSpd(double spd);
     void stopMove();
+    void reset();
     
     SpeedMotor& operator= (SpeedMotor &some);
 };

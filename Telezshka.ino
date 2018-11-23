@@ -1,32 +1,56 @@
 #include <Telezshka.h>
 
+// you should to remove "magic constants"
 int pFW1 [6] = {29, A1, 5, 25, 2, 22};
 int pFW2 [6] = {28, A2, 6, 26, 3, 23};
 int pFW3 [6] = {30, A3, 7, 27, 4, 24};
 
+// why 3?
 double xyz [3 * numberOfWheels];
 
-int iterations = 0;
+unsigned long int iterations = 0;
+unsigned long int timeInteruptionLim = 5000;
+unsigned long int timeInteruption = 0;
 
-const int emergencyStop = 2;
+const int interruptPin = 18;
 
 bool interruption = false;
+bool wrIte = false;
+bool telegaMoving = false;
 
 Telezshka *telega = nullptr;
 
 void emergencyStopTelezshka()
 {
+
   interruption = true;
-  telega->stopMove();   
+  if (telegaMoving)
+  {
+    telega->stopMove(); 
+  }
 }
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.setTimeout(100);
   Serial.println("Started");
-  attachInterrupt(emergencyStop, emergencyStopTelezshka, FALLING);
+  pinMode(interruptPin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(interruptPin), emergencyStopTelezshka, FALLING);
   telega = new Telezshka(pFW1, pFW2, pFW3);
+}
+
+
+void printPositions(Telezshka* telega, int numberOfWheels)
+{
+  telega->updateCurrentPosition();
+  // leave comment - why 2
+  for(int i = 0; i < 2*numberOfWheels; ++i)
+  {
+    Serial.print(telega->_positions[i]);
+    Serial.print(' ');
+  }
+  Serial.println();
 }
 
 void loop()
@@ -34,47 +58,63 @@ void loop()
     ++iterations;
     if (Serial.available() > 0)
     {
+      interruption = false;
+      telegaMoving = true;
+      wrIte = 1;
+      iterations = 0; 
+
+      // magic - 9 ???
       for (int i = 0; i < 9; ++i)
       {
         xyz[i] = Serial.parseFloat();
       }
 
       telega->setGo(xyz);
-      
+
+      // magic indexes!!!
       if ((xyz[2] + xyz[5] + xyz[8]) < 1.)
       {
         iterations = 0;
-        telega->updateCurrentPosition();
-        for(int i = 0; i < 2*numberOfWheels; ++i)
-        {
-          Serial.print(telega->_positions[i]);
-          Serial.print(' ');
-        }
+        printPositions(telega, numberOfWheels);
       }
     }
-
-    if(iterations % 100 == 0)
-      {
-        iterations = 0;
-        telega->updateCurrentPosition();
-        for(int i = 0; i < 2*numberOfWheels; ++i)
-        {
-          Serial.print(telega->_positions[i]);
-          Serial.print(' ');
-        }
-//        Serial.println();
-      }
-      
+    // why 500?
+    if (wrIte && iterations % 500 == 0)
+    {
+      iterations = 0;
+      printPositions(telega, numberOfWheels); 
+    }
+    
     telega->goTo();
-   
+
     if (!interruption && telega->isReachedDistance())
     {
-      Serial.print("done");
+      wrIte = 0;
+      iterations = 0;
+      telegaMoving = false;
+      printPositions(telega, numberOfWheels); 
+      Serial.println("done");
     }
-
-    interruption = false;
+    if (interruption && telega->isReachedDistance())
+    {
+        timeInteruption = millis();
+        wrIte = 0;
+        iterations = 0;
+        telegaMoving = false;
+        printPositions(telega, numberOfWheels); 
+        Serial.println("1");
+    }
+//    Serial.println(millis() - timeInteruption);
+    if (((millis() - timeInteruption) <= timeInteruptionLim) && (digitalRead(interruptPin) == 0) && (interruption))
+    {
+      wrIte = 1;
+      telegaMoving = true;
+      telega->setDataInMemory();
+    }
 }
 
+// 30.0 -200.0 200.0 -30.0 200.0 200.0 -90.0 -200.0 200.0
+// 30.0 200.0 200.0 -30.0 -200.0 200.0 -90.0 200.0 200.0
 // 30.0 0.0 0.0 -30.0 0.0 0.0 -90.0 0.0 0.0
 // 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 // 0.0 150.0 500.0 0.0 150.0 500.0 0.0 150.0 500.0
@@ -82,4 +122,5 @@ void loop()
 // 0.0 -255.0 100.0 0.0 -255.0 100.0 0.0 -255.0 100.0
 // 0.0 -255.0 1000.0 0.0 -255.0 1000.0 0.0 -255.0 1000.0
 // 0.0 -255.0 400.0 0.0 -255.0 400.0 0.0 -255.0 400.0
+// 0.0 -255.0 300.0 0.0 -255.0 300.0 0.0 -255.0 300.0
 // 0.0 255.0 400.0 0.0 255.0 400.0 0.0 255.0 400.0

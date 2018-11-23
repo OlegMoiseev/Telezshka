@@ -10,7 +10,7 @@
 #include "AngleMotor.h"
 #include "SpeedMotor.h"
 #include "Odometer.h"
-#include "defines.h"
+#include "Defines.h"
 #include <Array.h>
 
 class Wheel
@@ -18,12 +18,12 @@ class Wheel
   private:
     AngleMotor _turnMotor;
     SpeedMotor _rollMotor;
-    double _needDistance;
     Odometer _wheelOdometer;
+    double _needDistance;
   public:
     Wheel();
     Wheel(int pinsForWheel [6]);
-    void setMove(double spd, double angle, double distance);
+    void setMove(double spd, double angle, double distance, bool keyInterruption);
     Array <double, 2> wheelCurrentPosition();
     bool isTurnReached();
     void moveWheel(bool turning);

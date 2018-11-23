@@ -4,36 +4,135 @@ import socket
 import time
 
 
-def create_server(ip_in: str, port_in: int):
-    sock = socket.socket()
-    sock.bind((ip_in, port_in))
-    sock.listen(1)
-    return sock
+class Server:
+    def __init__(self, ip_server: str, port_server: int):
+        self.zero_str = "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
+        self.sock = socket.socket()
+        self.sock.bind((ip_server, port_server))
+        self.sock.listen(1)
+        print("Server started!")
+
+    def create_con(self):
+        self.connection, self.addr_from = self.sock.accept()
+        print("Connected CU by", self.connection, ":", self.addr_from)
+
+    def report_done(self):
+        self.connection.send("0.0 0.0 0.0 0.0 0.0 0.0".encode())
+
+    def report_error(self, num):
+        self.connection.send((num + " error").encode())
+
+    def report_invalid(self):
+        self.connection.send("invalid string".encode())
+
+    def report_info(self, data):
+        self.connection.send(data.encode())
+
+    def two_command_move(self, obj):
+        rot_angle = self.connection.recv(128).decode()
+        print("From CU: ", rot_angle)
+        go_line = self.connection.recv(128).decode()
+        print("From CU: ", go_line)
+
+        if rot_angle == self.zero_str and go_line == self.zero_str:
+            self.report_done()
+
+        if obj.validate_str(rot_angle) and obj.validate_str(go_line):
+            obj.send_to(rot_angle)
+
+            ans = obj.recv_from()
+
+            if "done" in ans:
+
+                obj.send_to(go_line)
+
+                ans = obj.recv_from()
+
+                if "done" in ans:
+                    self.report_done()
+                else:
+                    self.report_error("2")
+                    return 1
+            else:
+                self.report_error("1")
+                return 1
+        else:
+            self.report_invalid()
+            return 2
+
+        return 0
+
+    def one_command_move(self, obj):
+        go_line = self.connection.recv(128).decode()[2:]
+        print("From CU: ", go_line)
+        # if go_line == self.zero_str:
+        #     self.report_done()
+
+        if obj.validate_str(go_line):
+            obj.send_to(go_line)
+            # -----------------------------
+            # CRUTCH
+            go = go_line.split()
+            sign_negative = [False, False, False]
+            sign_negative[0] = True if go[1][0] == '-' else False
+            sign_negative[1] = True if go[4][0] == '-' else False
+            sign_negative[2] = True if go[7][0] == '-' else False
+            # -----------------------------
 
 
-def validate_str(in_str: str):
-    parsed = in_str.split()
-    if len(parsed) == 9:
-        return True
-    else:
-        return False
 
+            tracking = True
+            while tracking:
+                ans = obj.recv_from()
+                if "done" in ans:
+                    tracking = False
+                    self.report_done()
+                elif ans == "1\n":
+                    pass
 
-def report_done(sock):
-    sock.send("1 ".encode())
+                else:
+                    # -----------------------------
+                    # CRUTCH
+                    tmp = ans.split()
 
+                    if sign_negative[0]:
+                        tmp[0] = -1 * float(tmp[0])
+                    if sign_negative[1]:
+                        tmp[2] = -1 * float(tmp[2])
+                    if sign_negative[2]:
+                        tmp[4] = -1 * float(tmp[4])
 
-def report_error(num, sock):
-    sock.send((num + " error").encode())
+                    ans = ""
+                    for i in range(len(tmp)):
+                        ans += str(tmp[i]) + " "
 
+                    #ans = ans[:-1]
+                    print(ans)
+                    # -----------------------------
+                    self.report_info(ans)
 
-def report_invalid(sock):
-    sock.send("invalid string".encode())
+        else:
+            self.report_invalid()
+            return 2
+
+        return 0
+
+    def stop(self):
+        self.connection.close()
+
+    def start(self, obj):
+        try:
+            while True:
+                if self.one_command_move(obj) != 0:
+                    break
+        except Exception as e:
+            print(e)
+            print("Connect aborted by exception")
 
 
 class Telega:
     def __init__(self, com_port: str):
-        self.com = serial.Serial(com_port, baudrate=9600, timeout=120)
+        self.com = serial.Serial(com_port, baudrate=115200, timeout=120)
         # pass
 
     def send_to(self, in_str: str):
@@ -42,79 +141,24 @@ class Telega:
 
     def recv_from(self):
         # time.sleep(1)
-        ans = self.com.read(4).decode()
+        ans = self.com.readline().decode()
         # ans = "done"
         print("Recv from telega:", ans.encode())
         return ans
 
     def recv_init(self):
-        ans = self.com.readline().decode()
+        ans = self.com.readline()
         # ans = "Init completed"
-        print("Recv from telega:", ans.encode())
+        # print("Recv from telega:", ans.encode())
         return ans
 
     def stop(self):
         self.com.close()
         # pass
 
-
-def two_command_move(sock, obj):
-    rot_angle = sock.recv(128).decode()
-    print("From CU: ", rot_angle)
-    go_line = sock.recv(128).decode()
-    print("From CU: ", go_line)
-    if rot_angle == zero_str and go_line == zero_str:
-        report_done(sock)
-
-    if validate_str(rot_angle) and validate_str(go_line):
-        obj.send_to(rot_angle)
-
-        ans = obj.recv_from()
-
-        if "done" in ans:
-
-            obj.send_to(go_line)
-
-            ans = obj.recv_from()
-
-            if "done" in ans:
-                report_done(sock)
-            else:
-                report_error("2", sock)
-                return 1
-        else:
-            report_error("1", sock)
-            return 1
-    else:
-        report_invalid(sock)
-        return 2
-
-    return 0
-
-
-def one_command_move(sock, obj):
-    go_line = sock.recv(128).decode()[2:]
-    print("From CU: ", go_line)
-    if go_line == zero_str:
-        report_done(sock)
-
-    if validate_str(go_line):
-        obj.send_to(go_line)
-
-        ans = obj.recv_from()
-
-        if "done" in ans:
-
-            report_done(sock)
-
-        else:
-            report_error("1", sock)
-            return 1
-    else:
-        report_invalid(sock)
-        return 2
-
-    return 0
+    def validate_str(self, in_str: str):
+        parsed = in_str.split()
+        return len(parsed) == 9
 
 
 with open("config.json") as file:
@@ -125,24 +169,20 @@ print(telega.recv_init())
 print("Telega started!")
 ip = config_json["RobotServer"]["IPAddress"]  # empty == localhost
 port = int(config_json["RobotServer"]["port"])
-zero_str = "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
 
 print("Application started!")
 
+server_for_cu = Server(ip, port)
+
 while True:
-    from_cu_sock, addr_from = create_server(ip, port).accept()
-    print("Server started!")
-    print("Connected CU by", port, ":", addr_from)
     try:
-        while True:
-            if one_command_move(from_cu_sock, telega) != 0:
-                break
+        server_for_cu.create_con()
+        server_for_cu.start(telega)
 
+        server_for_cu.stop()
+        print("Connection aborted by Danya")
+    # time.sleep(5)
     except:
-        print("Connect aborted by exception")
-
-    from_cu_sock.close()
-    print("Connection aborted by Danya")
-    time.sleep(5)
-
+        server_for_cu.stop()
+    print("except")
 telega.stop()

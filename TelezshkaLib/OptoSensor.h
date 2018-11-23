@@ -9,7 +9,7 @@
 
 #include "DigitalSensor.h"
 #include "Odometer.h"
-#include "defines.h"
+#include "Defines.h"
 
 class OptoSensor : public DigitalSensor
 {
