@@ -10,6 +10,10 @@ class Server:
         self.sock = socket.socket()
         self.sock.bind((ip_server, port_server))
         self.sock.listen(1)
+
+        self.done_msg = "done"
+        self.interruption = "1\r\n"
+
         print("Server started!")
 
     def create_con(self):
@@ -79,16 +83,19 @@ class Server:
             sign_negative[2] = True if go[7][0] == '-' else False
             # -----------------------------
 
-
-
             tracking = True
+            ans = ""
             while tracking:
                 ans = obj.recv_from()
-                if "done" in ans:
+                if self.done_msg in ans:
                     tracking = False
-                    self.report_done()
-                elif ans == "1\n":
-                    pass
+                    ans += "1 "
+                    self.report_info(ans)
+
+                elif ans == self.interruption:
+                    tracking = False
+                    ans += "2 "
+                    self.report_info(ans)
 
                 else:
                     # -----------------------------
@@ -105,8 +112,7 @@ class Server:
                     ans = ""
                     for i in range(len(tmp)):
                         ans += str(tmp[i]) + " "
-
-                    #ans = ans[:-1]
+                    ans += "0 "
                     print(ans)
                     # -----------------------------
                     self.report_info(ans)
