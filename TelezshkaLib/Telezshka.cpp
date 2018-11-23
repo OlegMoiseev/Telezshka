@@ -75,8 +75,6 @@ void Telezshka::setGo(double valuesMove [3 * numberOfWheels])
   {
     if (sum < 1.)
     {
-      _memory[i * 3 + 2] = _wheels.at(i).deltaDistance();
-
       _keyInterruption = true;
       _wheels.at(i).setMove(valuesMove[i * 3], valuesMove[i * 3 + 1], valuesMove[i * 3 + 2], _keyInterruption);
     }
@@ -84,6 +82,7 @@ void Telezshka::setGo(double valuesMove [3 * numberOfWheels])
     {
       _memory[i * 3] = valuesMove[i * 3];
       _memory[i * 3 + 1] = valuesMove[i * 3 + 1];
+      _memory[i * 3 + 2] = valuesMove[i * 3 + 2];
 
       _keyInterruption = false;
       _wheels.at(i).setMove(valuesMove[i * 3], valuesMove[i * 3 + 1], valuesMove[i * 3 + 2], _keyInterruption);
@@ -177,9 +176,13 @@ void Telezshka::stopMove()
 
 void Telezshka::setDataInMemory()
 {
+
+  _doneTurn = true;
+  _doneMove = true;
+  _keyInterruption = false;
   for (int i = 0; i < numberOfWheels; ++i)
   {
-    _wheels.at(i).setMove(_memory[i * 3], _memory[i * 3 + 1], _memory[i * 3 + 2], _keyInterruption);
+    _wheels.at(i).setMove(_memory[i * 3], _memory[i * 3 + 1], _memory[i * 3 + 2], true);
   }
   
 }

@@ -1,15 +1,13 @@
 #include <Telezshka.h>
 
-// you should to remove "magic constants"
 int pFW1 [6] = {29, A1, 5, 25, 2, 22};
 int pFW2 [6] = {28, A2, 6, 26, 3, 23};
 int pFW3 [6] = {30, A3, 7, 27, 4, 24};
 
-// why 3?
 double xyz [3 * numberOfWheels];
 
 unsigned long int iterations = 0;
-unsigned long int timeInteruptionLim = 5000;
+unsigned long int timeInteruptionLim = 10000;
 unsigned long int timeInteruption = 0;
 
 const int interruptPin = 18;
@@ -17,6 +15,7 @@ const int interruptPin = 18;
 bool interruption = false;
 bool wrIte = false;
 bool telegaMoving = false;
+bool interruptionMode = false;
 
 Telezshka *telega = nullptr;
 
@@ -38,13 +37,14 @@ void setup()
   pinMode(interruptPin, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(interruptPin), emergencyStopTelezshka, FALLING);
   telega = new Telezshka(pFW1, pFW2, pFW3);
+
+  
 }
 
 
 void printPositions(Telezshka* telega, int numberOfWheels)
 {
   telega->updateCurrentPosition();
-  // leave comment - why 2
   for(int i = 0; i < 2*numberOfWheels; ++i)
   {
     Serial.print(telega->_positions[i]);
@@ -55,6 +55,11 @@ void printPositions(Telezshka* telega, int numberOfWheels)
 
 void loop()
 {   
+    if (digitalRead(interruptPin) == 1)
+    {
+      interruption = false;
+    }
+  
     ++iterations;
     if (Serial.available() > 0)
     {
@@ -62,23 +67,21 @@ void loop()
       telegaMoving = true;
       wrIte = 1;
       iterations = 0; 
-
-      // magic - 9 ???
+      
       for (int i = 0; i < 9; ++i)
       {
         xyz[i] = Serial.parseFloat();
       }
 
       telega->setGo(xyz);
-
-      // magic indexes!!!
+      
       if ((xyz[2] + xyz[5] + xyz[8]) < 1.)
       {
         iterations = 0;
         printPositions(telega, numberOfWheels);
       }
     }
-    // why 500?
+
     if (wrIte && iterations % 500 == 0)
     {
       iterations = 0;
@@ -95,6 +98,7 @@ void loop()
       printPositions(telega, numberOfWheels); 
       Serial.println("done");
     }
+
     if (interruption && telega->isReachedDistance())
     {
         timeInteruption = millis();
@@ -102,12 +106,19 @@ void loop()
         iterations = 0;
         telegaMoving = false;
         printPositions(telega, numberOfWheels); 
-        Serial.println("1");
+        interruptionMode = true;
     }
-//    Serial.println(millis() - timeInteruption);
-    if (((millis() - timeInteruption) <= timeInteruptionLim) && (digitalRead(interruptPin) == 0) && (interruption))
+
+    if (((millis() - timeInteruption) > timeInteruptionLim) && interruptionMode)
+    {
+      interruptionMode = false;
+      Serial.println("1");
+    }
+    if (((millis() - timeInteruption) <= timeInteruptionLim) && (digitalRead(interruptPin) == 1) && (interruption))
     {
       wrIte = 1;
+      interruptionMode = false;
+      interruption = false;
       telegaMoving = true;
       telega->setDataInMemory();
     }
