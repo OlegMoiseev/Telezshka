@@ -1,9 +1,11 @@
 #include <Telezshka.h>
 
+// you should to remove "magic constants"
 int pFW1 [6] = {29, A1, 5, 25, 2, 22};
 int pFW2 [6] = {28, A2, 6, 26, 3, 23};
 int pFW3 [6] = {30, A3, 7, 27, 4, 24};
 
+// why 3?
 double xyz [3 * numberOfWheels];
 
 unsigned long int iterations = 0;
@@ -42,6 +44,7 @@ void setup()
 void printPositions(Telezshka* telega, int numberOfWheels)
 {
   telega->updateCurrentPosition();
+  // leave comment - why 2
   for(int i = 0; i < 2*numberOfWheels; ++i)
   {
     Serial.print(telega->_positions[i]);
@@ -59,21 +62,23 @@ void loop()
       telegaMoving = true;
       wrIte = 1;
       iterations = 0; 
-      
+
+      // magic - 9 ???
       for (int i = 0; i < 9; ++i)
       {
         xyz[i] = Serial.parseFloat();
       }
 
       telega->setGo(xyz);
-      
+
+      // magic indexes!!!
       if ((xyz[2] + xyz[5] + xyz[8]) < 1.)
       {
         iterations = 0;
         printPositions(telega, numberOfWheels);
       }
     }
-
+    // why 500?
     if (wrIte && iterations % 500 == 0)
     {
       iterations = 0;
