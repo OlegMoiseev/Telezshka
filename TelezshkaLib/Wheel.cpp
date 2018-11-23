@@ -102,7 +102,7 @@ bool Wheel::isDistReached()
     Serial.println("WHEEL called isDistReached");
   #endif
 
-  return deltaDistance() < 5.;
+  return deltaDistance() <= 5.;
 }
 
 Wheel& Wheel::operator= (Wheel &&some)

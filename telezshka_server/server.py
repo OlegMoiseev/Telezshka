@@ -84,18 +84,18 @@ class Server:
             # -----------------------------
 
             tracking = True
-            ans = ""
+            old_ans = ""
             while tracking:
                 ans = obj.recv_from()
                 if self.done_msg in ans:
                     tracking = False
-                    ans += "1 "
-                    self.report_info(ans)
+                    old_ans += "1 "
+                    self.report_info(old_ans)
 
                 elif ans == self.interruption:
                     tracking = False
-                    ans += "2 "
-                    self.report_info(ans)
+                    old_ans += "2 "
+                    self.report_info(old_ans)
 
                 else:
                     # -----------------------------
@@ -112,6 +112,7 @@ class Server:
                     ans = ""
                     for i in range(len(tmp)):
                         ans += str(tmp[i]) + " "
+                    old_ans = ans
                     ans += "0 "
                     print(ans)
                     # -----------------------------
