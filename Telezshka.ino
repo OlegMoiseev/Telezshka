@@ -7,6 +7,8 @@ int pFW3 [6] = {30, A3, 7, 27, 4, 24};
 double xyz [3 * numberOfWheels];
 
 unsigned long int iterations = 0;
+unsigned long int timeInteruptionLim = 5000;
+unsigned long int timeInteruption = 0;
 
 const int interruptPin = 18;
 
@@ -18,7 +20,7 @@ Telezshka *telega = nullptr;
 
 void emergencyStopTelezshka()
 {
-//  Serial.println("iIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
+
   interruption = true;
   if (telegaMoving)
   {
@@ -28,7 +30,7 @@ void emergencyStopTelezshka()
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.setTimeout(100);
   Serial.println("Started");
   pinMode(interruptPin, INPUT_PULLUP);
@@ -90,11 +92,19 @@ void loop()
     }
     if (interruption && telega->isReachedDistance())
     {
+        timeInteruption = millis();
         wrIte = 0;
         iterations = 0;
         telegaMoving = false;
         printPositions(telega, numberOfWheels); 
         Serial.println("1");
+    }
+//    Serial.println(millis() - timeInteruption);
+    if (((millis() - timeInteruption) <= timeInteruptionLim) && (digitalRead(interruptPin) == 0) && (interruption))
+    {
+      wrIte = 1;
+      telegaMoving = true;
+      telega->setDataInMemory();
     }
 }
 
@@ -107,4 +117,5 @@ void loop()
 // 0.0 -255.0 100.0 0.0 -255.0 100.0 0.0 -255.0 100.0
 // 0.0 -255.0 1000.0 0.0 -255.0 1000.0 0.0 -255.0 1000.0
 // 0.0 -255.0 400.0 0.0 -255.0 400.0 0.0 -255.0 400.0
+// 0.0 -255.0 300.0 0.0 -255.0 300.0 0.0 -255.0 300.0
 // 0.0 255.0 400.0 0.0 255.0 400.0 0.0 255.0 400.0

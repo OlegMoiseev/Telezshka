@@ -20,7 +20,8 @@ class Telezshka
     bool _doneTurn;
     bool _keyInterruption;
     double _stopArray [3 * numberOfWheels];
-    
+    double _memory [3 * numberOfWheels];
+
   public:
     double _positions [2 * numberOfWheels];
     Telezshka(int pinsForWheel1 [6], int pinsForWheel2 [6], int pinsForWheel3 [6]);
@@ -30,6 +31,7 @@ class Telezshka
     void stopMove();
     void updateCurrentPosition();
     bool isReachedDistance();
+    void setDataInMemory();
     
     Telezshka& operator= (Telezshka &some);
 };
