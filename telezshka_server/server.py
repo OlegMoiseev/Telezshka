@@ -87,6 +87,8 @@ class Server:
                 if "done" in ans:
                     tracking = False
                     self.report_done()
+                elif ans == "1\n":
+                    pass
 
                 else:
                     # -----------------------------
