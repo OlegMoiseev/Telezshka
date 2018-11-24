@@ -27,7 +27,7 @@ class Server:
         self.connection.send((num + " error").encode())
 
     def report_invalid(self):
-        self.connection.send("invalid string".encode())
+        self.connection.send("-1".encode())
 
     def report_info(self, data):
         self.connection.send(data.encode())
@@ -142,6 +142,9 @@ class Telega:
         self.com = serial.Serial(com_port, baudrate=115200, timeout=120)
         # pass
 
+    def change_timeout(self, sec):
+        self.com.timeout = sec
+
     def send_to(self, in_str: str):
         self.com.write(in_str.encode())
         # print("Send to telega:", in_str.encode())
@@ -168,7 +171,7 @@ class Telega:
         self.com.reset_output_buffer()
 
 
-with open("./config.json") as file:
+with open("config.json") as file:
     config_json = json.load(file)
 
 telega = Telega(config_json["RobotServer"]["COMPort"])  # from Arduino studio COM-port
@@ -181,17 +184,29 @@ print("Application started!")
 
 server_for_cu = Server(ip, port)
 
+default_timeout = 120
+skip_timeout = 5
 while True:
     try:
         telega.reset_buffers()
-
+        telega.change_timeout(default_timeout)
         server_for_cu.create_con()
         server_for_cu.start(telega)
 
         server_for_cu.stop()
         print("Connection aborted by Danya")
-    # time.sleep(5)
-    except:
+        # time.sleep(5)
+    except Exception as e:
+        telega.change_timeout(default_timeout)
+        while True:
+            ans = telega.recv_from()
+            print("Skipped:", ans)
+            if " 1 " in ans or " 2 " in ans:
+                break
+            else:
+                pass
+
         server_for_cu.stop()
-    print("except")
+        print(e)
+        print("except")
 telega.stop()
