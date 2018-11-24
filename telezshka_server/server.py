@@ -163,11 +163,17 @@ class Telega:
         parsed = in_str.split()
         return len(parsed) == 9
 
+    def reset_buffers(self):
+        self.com.reset_input_buffer()
+        self.com.reset_output_buffer()
+
 
 with open("config.json") as file:
     config_json = json.load(file)
 
-
+telega = Telega(config_json["RobotServer"]["COMPort"])  # from Arduino studio COM-port
+print(telega.recv_init())
+print("Telega started!")
 ip = config_json["RobotServer"]["IPAddress"]  # empty == localhost
 port = int(config_json["RobotServer"]["port"])
 
@@ -177,9 +183,7 @@ server_for_cu = Server(ip, port)
 
 while True:
     try:
-        telega = Telega(config_json["RobotServer"]["COMPort"])  # from Arduino studio COM-port
-        print(telega.recv_init())
-        print("Telega started!")
+        telega.reset_buffers()
 
         server_for_cu.create_con()
         server_for_cu.start(telega)
@@ -189,6 +193,5 @@ while True:
     # time.sleep(5)
     except:
         server_for_cu.stop()
-        telega.stop()
-
     print("except")
+telega.stop()
