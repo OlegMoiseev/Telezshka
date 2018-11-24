@@ -138,7 +138,7 @@ class Server:
             while True:
                 ans = telega.recv_from()
                 print("Skipped:", ans)
-                if " 1 " in ans or " 2 " in ans:
+                if " 1 " in ans or " 2 " in ans or ans == b'':
                     break
                 else:
                     pass
