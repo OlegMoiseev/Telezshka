@@ -137,7 +137,7 @@ class Server:
             while True:
                 ans = telega.recv_from()
                 print("Skipped:", ans)
-                if " 1 " in ans or " 2 " in ans or ans == b'':
+                if "done" in ans or ans == b'1\r\n' or ans == b'':
                     break
                 else:
                     pass
