@@ -119,7 +119,7 @@ class Server:
                     self.report_info(ans)
 
         else:
-            self.report_invalid()
+            # self.report_invalid()
             return 2
 
         return 0
@@ -128,22 +128,24 @@ class Server:
         self.connection.close()
 
     def start(self, obj):
-        try:
-            obj.change_timeout(120)
-            while True:
-                if self.one_command_move(obj) != 0:
-                    break
-        except Exception as e:
-            obj.change_timeout(5)
-            while True:
-                ans = telega.recv_from()
-                print("Skipped:", ans)
-                if " 1 " in ans or " 2 " in ans or ans == b'':
-                    break
-                else:
-                    pass
-            print(e)
-            print("Connect aborted by exception")
+        while True:
+            obj.reset_buffers()
+            try:
+                obj.change_timeout(120)
+                while True:
+                    if self.one_command_move(obj) != 0:
+                        break
+            except Exception as e:
+                # obj.change_timeout(5)
+                # while True:
+                #     ans = telega.recv_from()
+                #     print("Skipped:", ans)
+                #     if " 1 " in ans or " 2 " in ans or ans == b'':
+                #         break
+                #     else:
+                #         pass
+                print(e)
+                print("Connect aborted by exception")
 
 
 class Telega:
@@ -195,18 +197,17 @@ server_for_cu = Server(ip, port)
 
 default_timeout = 120
 skip_timeout = 5
-while True:
-    try:
-        telega.reset_buffers()
-        server_for_cu.create_con()
-        server_for_cu.start(telega)
+try:
+    telega.reset_buffers()
+    server_for_cu.create_con()
+    server_for_cu.start(telega)
 
-        server_for_cu.stop()
-        print("Connection aborted by Danya")
-        # time.sleep(5)
-    except Exception as e:
+    server_for_cu.stop()
+    print("Connection aborted by Danya")
+    # time.sleep(5)
+except Exception as e:
 
-        server_for_cu.stop()
-        print(e)
-        print("except")
+    server_for_cu.stop()
+    print(e)
+    print("except")
 telega.stop()
