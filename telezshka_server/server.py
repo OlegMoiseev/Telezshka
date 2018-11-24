@@ -147,16 +147,12 @@ class Telega:
         # print("Send to telega:", in_str.encode())
 
     def recv_from(self):
-        # time.sleep(1)
         ans = self.com.readline().decode()
-        # ans = "done"
         print("Recv from telega:", ans.encode())
         return ans
 
     def recv_init(self):
         ans = self.com.readline()
-        # ans = "Init completed"
-        # print("Recv from telega:", ans.encode())
         return ans
 
     def stop(self):
@@ -171,9 +167,7 @@ class Telega:
 with open("config.json") as file:
     config_json = json.load(file)
 
-telega = Telega(config_json["RobotServer"]["COMPort"])  # from Arduino studio COM-port
-print(telega.recv_init())
-print("Telega started!")
+
 ip = config_json["RobotServer"]["IPAddress"]  # empty == localhost
 port = int(config_json["RobotServer"]["port"])
 
@@ -183,6 +177,10 @@ server_for_cu = Server(ip, port)
 
 while True:
     try:
+        telega = Telega(config_json["RobotServer"]["COMPort"])  # from Arduino studio COM-port
+        print(telega.recv_init())
+        print("Telega started!")
+
         server_for_cu.create_con()
         server_for_cu.start(telega)
 
@@ -191,5 +189,6 @@ while True:
     # time.sleep(5)
     except:
         server_for_cu.stop()
+        telega.stop()
+
     print("except")
-telega.stop()
