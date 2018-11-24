@@ -129,10 +129,19 @@ class Server:
 
     def start(self, obj):
         try:
+            obj.change_timeout(120)
             while True:
                 if self.one_command_move(obj) != 0:
                     break
         except Exception as e:
+            obj.change_timeout(5)
+            while True:
+                ans = telega.recv_from()
+                print("Skipped:", ans)
+                if " 1 " in ans or " 2 " in ans:
+                    break
+                else:
+                    pass
             print(e)
             print("Connect aborted by exception")
 
@@ -189,7 +198,6 @@ skip_timeout = 5
 while True:
     try:
         telega.reset_buffers()
-        telega.change_timeout(default_timeout)
         server_for_cu.create_con()
         server_for_cu.start(telega)
 
@@ -197,14 +205,6 @@ while True:
         print("Connection aborted by Danya")
         # time.sleep(5)
     except Exception as e:
-        telega.change_timeout(default_timeout)
-        while True:
-            ans = telega.recv_from()
-            print("Skipped:", ans)
-            if " 1 " in ans or " 2 " in ans:
-                break
-            else:
-                pass
 
         server_for_cu.stop()
         print(e)
