@@ -168,7 +168,7 @@ class Telega:
         self.com.reset_output_buffer()
 
 
-with open("config.json") as file:
+with open("./config.json") as file:
     config_json = json.load(file)
 
 telega = Telega(config_json["RobotServer"]["COMPort"])  # from Arduino studio COM-port
