@@ -12,7 +12,7 @@ DigitalSensor::DigitalSensor(const int pin)
   	pinMode(_pin, INPUT);
 }
 
-int DigitalSensor::getData()
+bool DigitalSensor::getData()
 {
 	#ifdef DIGITALSENSOR
 		Serial.print("DIGITALSENSOR called getData with data = ");
