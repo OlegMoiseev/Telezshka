@@ -12,12 +12,15 @@ Potentiometer::Potentiometer(const int pin)
 
 double Potentiometer::getAngle()
 {
+	const double relativeAngle = 330.;
+	const double absoluteAngle = 1024.;
+
 	#ifdef POTENTIOMETER
 		Serial.print("POTENTIOMETER called getAngle and anle = ");
-		Serial.println(getData() * (330. / 1024.));
+		Serial.println(getData() * (relativeAngle / absoluteAngle));
 	#endif
 
-  return getData() * (330. / 1024.);
+	return getData() * (relativeAngle / absoluteAngle);
 }
 
 Potentiometer& Potentiometer::operator= (Potentiometer &some)

@@ -21,6 +21,7 @@ class AngleMotor : public Motor
     double _turnKoefPID;
     double _turnEps;
     double _gearsKoef;
+    double _angleRotatingLimitRelative;
   public:
     Potentiometer _poten;
     AngleMotor(const int potenPin, const int speedPin, const int reversePin);

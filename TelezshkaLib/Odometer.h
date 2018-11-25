@@ -13,11 +13,18 @@ class Odometer
 {
   private:
     double _distance;
+
+    /*****
+    * Passing each tooth turns the wheel 5 mm.
+    *****/
+    double _step;
+  
   public:
     Odometer();
     void resetOdometer();
     void updateDistance();
     double getDistance();
+    double getStep();
 
     Odometer& operator= (Odometer &some);
 };

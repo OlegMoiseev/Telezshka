@@ -59,7 +59,7 @@ double Wheel::deltaDistance()
   #ifdef WHEEL
     Serial.println("WHEEL called deltaDistance");
   #endif
-    // Serial.println(abs(_needDistance - _rollMotor._opto._odometer.getDistance()));
+
   return abs(_needDistance - _rollMotor._opto._odometer.getDistance());
 }
 
@@ -102,7 +102,7 @@ bool Wheel::isDistReached()
     Serial.println("WHEEL called isDistReached");
   #endif
 
-  return deltaDistance() <= 5.;
+  return deltaDistance() <= _wheelOdometer.getStep();
 }
 
 Wheel& Wheel::operator= (Wheel &&some)

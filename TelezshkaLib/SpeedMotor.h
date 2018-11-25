@@ -18,7 +18,23 @@ class SpeedMotor : public Motor
     double _currentSpeed;
     double _sendSpd;
     double _maxSpeed;
-    double _numberOfStaps;
+
+    /*****
+    * Minimal speed when Telezshka can moving
+    *****/
+    const double _minimalSpeedWhenTelezshkaRiding;
+
+    const double _absolutelyMaxSpeed;
+
+    /*****
+    * On what value of speed we must reacting.
+    *****/
+    const double _epsilonSpeed;
+
+    /*****
+    * How quickly we change rolling speed.
+    *****/
+    const double _numberOfStaps;
   
   public:
     OptoSensor _opto;
