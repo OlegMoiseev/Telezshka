@@ -20,9 +20,10 @@ class Wheel
     SpeedMotor _rollMotor;
     Odometer _wheelOdometer;
     double _needDistance;
+    
   public:
     Wheel();
-    Wheel(int pinsForWheel [6]);
+    Wheel(int* pinsForWheel, size_t size);
     void setMove(double spd, double angle, double distance, bool keyInterruption);
     Array <double, 2> wheelCurrentPosition();
     bool isTurnReached();

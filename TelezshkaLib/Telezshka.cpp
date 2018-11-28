@@ -1,6 +1,6 @@
 #include "Telezshka.h"
 
-Telezshka::Telezshka(int pinsForWheel1 [6], int pinsForWheel2 [6], int pinsForWheel3 [6])
+Telezshka::Telezshka(int* pinsForWheel1, size_t sizeW1, int* pinsForWheel2, size_t sizeW2, int* pinsForWheel3, size_t sizeW3)
   :
   _doneMove(false),
   _doneTurn(false),
@@ -8,21 +8,21 @@ Telezshka::Telezshka(int pinsForWheel1 [6], int pinsForWheel2 [6], int pinsForWh
 {
   #ifdef TELEZSHKA
     Serial.print("TELEZSHKA init with arrays of wheels and stopArray with pins w1 = [ ");
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < sizeW1; i++)
     {
-      Serial.print(pinsForWheel1[i]);
+      Serial.print(*(pinsForWheel1 + i));
       Serial.print(" ");
     }
     Serial.print("], w2 = [ ");
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < sizeW2; i++)
     {
-      Serial.print(pinsForWheel2[i]);
+      Serial.print(*(pinsForWheel2 + i));
       Serial.print(" ");
     }
     Serial.print("], w3 = [ ");
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < sizeW3; i++)
     {
-      Serial.print(pinsForWheel3[i]);
+      Serial.print(*(pinsForWheel3 + i));
       Serial.print(" ");
     }
     Serial.print("], doneMove = ");
@@ -31,9 +31,9 @@ Telezshka::Telezshka(int pinsForWheel1 [6], int pinsForWheel2 [6], int pinsForWh
     Serial.println(_doneTurn);
   #endif
 
-  _wheels.at(0) = Wheel(pinsForWheel1);
-  _wheels.at(1) = Wheel(pinsForWheel2);
-  _wheels.at(2) = Wheel(pinsForWheel3);
+  _wheels.at(0) = Wheel(pinsForWheel1, sizeW1);
+  _wheels.at(1) = Wheel(pinsForWheel2, sizeW2);
+  _wheels.at(2) = Wheel(pinsForWheel3, sizeW3);
   
 
   for (int i = 0; i < numberOfWheels; ++i)
@@ -49,13 +49,13 @@ Telezshka::Telezshka(int pinsForWheel1 [6], int pinsForWheel2 [6], int pinsForWh
 }
 
 
-void Telezshka::setGo(double valuesMove [3 * numberOfWheels])
+void Telezshka::setGo(double* valuesMove, size_t size)
 {
   #ifdef TELEZSHKA
     Serial.print("TELEZSHKA called setGo with values = [ ");
-    for (int i = 0; i < 3 * numberOfWheels; ++i)
+    for (int i = 0; i < size; ++i)
     {
-      Serial.print(valuesMove[i]);
+      Serial.print(*(valuesMove + i));
       Serial.print(" ");
     }
     Serial.println("]");
@@ -66,7 +66,7 @@ void Telezshka::setGo(double valuesMove [3 * numberOfWheels])
 
   double sum = 0;
   
-  for(int i = 0; i < 3 * numberOfWheels; ++i)
+  for(int i = 0; i < size; ++i)
   {
     sum += abs(valuesMove[i]);
   }
@@ -170,7 +170,8 @@ void Telezshka::stopMove()
   #ifdef TELEZSHKA
     Serial.println("TELEZSHKA called stopMove");
   #endif
-  setGo(_stopArray);
+  size_t size = 3 * numberOfWheels;
+  setGo(_stopArray, size);
   goTo();
 }
 
