@@ -36,7 +36,7 @@ void setup()
   Serial.println("Started");
   pinMode(interruptPin, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(interruptPin), emergencyStopTelezshka, FALLING);
-  telega = new Telezshka(pFW1, pFW2, pFW3);
+  telega = new Telezshka(pFW1, 6, pFW2, 6, pFW3, 6);
 
   
 }
@@ -73,7 +73,7 @@ void loop()
         xyz[i] = Serial.parseFloat();
       }
 
-      telega->setGo(xyz);
+      telega->setGo(xyz, 3 * numberOfWheels);
       
       if ((xyz[2] + xyz[5] + xyz[8]) < 1.)
       {

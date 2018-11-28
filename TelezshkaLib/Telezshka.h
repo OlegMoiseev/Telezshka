@@ -24,9 +24,9 @@ class Telezshka
 
   public:
     double _positions [2 * numberOfWheels];
-    Telezshka(int pinsForWheel1 [6], int pinsForWheel2 [6], int pinsForWheel3 [6]);
+    Telezshka(int* pinsForWheel1, size_t sizeW1, int* pinsForWheel2, size_t sizeW2, int* pinsForWheel3, size_t sizeW3);
     Telezshka();
-    void setGo(double valuesMove [3 * numberOfWheels]);
+    void setGo(double* valuesMove, size_t size);
     void goTo();
     void stopMove();
     void updateCurrentPosition();

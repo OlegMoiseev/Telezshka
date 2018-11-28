@@ -12,7 +12,7 @@ Wheel::Wheel()
   #endif
 }
 
-Wheel::Wheel(int pinsForWheel [6])
+Wheel::Wheel(int* pinsForWheel, size_t size)
   :
   _turnMotor(pinsForWheel[1], pinsForWheel[4], pinsForWheel[5]),
   _rollMotor(pinsForWheel[0], pinsForWheel[2], pinsForWheel[3]),
@@ -81,7 +81,6 @@ void Wheel::moveWheel(bool turning)
   #ifdef WHEEL
     Serial.println("WHEEL called moveWheel");
   #endif
-
   _turnMotor.standAngle();
   if (turning)
   {
