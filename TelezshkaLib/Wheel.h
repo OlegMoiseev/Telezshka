@@ -20,7 +20,7 @@ class Wheel
     SpeedMotor _rollMotor;
     Odometer _wheelOdometer;
     double _needDistance;
-    
+
   public:
     Wheel();
     Wheel(int* pinsForWheel, size_t size);

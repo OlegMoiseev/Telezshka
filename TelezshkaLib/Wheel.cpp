@@ -81,7 +81,6 @@ void Wheel::moveWheel(bool turning)
   #ifdef WHEEL
     Serial.println("WHEEL called moveWheel");
   #endif
-
   _turnMotor.standAngle();
   if (turning)
   {
