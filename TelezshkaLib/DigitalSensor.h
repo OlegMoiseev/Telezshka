@@ -13,7 +13,7 @@ class DigitalSensor
 {
   protected:
     int _pin;
-    int getData();
+    bool getData();
   public:
     DigitalSensor(const int pin);
 };
