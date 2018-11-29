@@ -21,18 +21,29 @@ double OptoSensor::getSpeed()
   _curState = getData();
   if (_curState != _prevState)
   {
+
+    /*****
+    * Time what we need to pass by tooth and by space between two tooths.
+    *****/
+    const double stepInTrueCurState = 1.382239382;
+    const double stepInFalseCurState = 0.7306122449; 
+    const double convertMicrosecToSec = 1e6;
+
     _stepTime = micros() - _prevTime;
     _prevState = _curState;
     _prevTime = micros();
-    _curState == true ? _stepTime *= 1.382239382 : _stepTime *= 0.7306122449;
+    _curState == true ? _stepTime *= stepInTrueCurState : _stepTime *= stepInFalseCurState;
     _odometer.updateDistance();
 
     #ifdef OPTOSENSOR
       Serial.print("OPTOSENSOR called getSpeed and speed = ");
-      Serial.println(5. / (static_cast<double>(_stepTime) / 1e6));
+      Serial.println(_odometer.getStep() / (static_cast<double>(_stepTime) / convertMicrosecToSec));
     #endif
-    
-    return 5. / (static_cast<double>(_stepTime) / 1e6);  // 5 mm / (time in microseconds / 1 000 000);
+      
+    /*****
+    * 5 mm / (time in microseconds / 1 000 000)
+    *****/
+    return _odometer.getStep() / (static_cast<double>(_stepTime) / convertMicrosecToSec);
   }
 }
 

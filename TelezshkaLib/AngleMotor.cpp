@@ -8,7 +8,8 @@ AngleMotor::AngleMotor(const int potenPin, const int speedPin, const int reverse
   _turnEps(1.),
   _needAngle(175.),
   _gearsKoef(94. / 75.),
-  _angleReached(false)
+  _angleReached(false),
+  _angleRotatingLimitRelative(120.)
 {
   #ifdef ANGLEMOTOR
     Serial.print("ANGLEMOTOR init: Potentiometer ");
@@ -58,18 +59,24 @@ AngleMotor& AngleMotor::operator= (AngleMotor &some)
 void AngleMotor::setAngle(double angle)
 {
   _angleReached = false;
-  if (abs(angle) > 120.)
+  if (abs(angle) > _angleRotatingLimitRelative)
   {
-    if (angle > 120.)
+    if (angle > _angleRotatingLimitRelative)
     {
-      angle = 120.;
+      angle = _angleRotatingLimitRelative;
     }
-    if (angle < -120.)
+    if (angle < -_angleRotatingLimitRelative)
     {
-      angle = -120.;
+      angle = -_angleRotatingLimitRelative;
     }
   }
-  _needAngle = (angle + 140.) * _gearsKoef;
+
+  /****
+  * this constant need to conform angle from relative (0, |120|) to absolute (0, 330) form
+  ****/
+  const double relativeToAbsolutelyAngle = 140.;
+
+  _needAngle = (angle + relativeToAbsolutelyAngle) * _gearsKoef;
 
   #ifdef ANGLEMOTOR
     Serial.print("ANGLEMOTOR called setAngle with angle = ");
@@ -93,14 +100,32 @@ double AngleMotor::getAngleNow()
 void AngleMotor::standAngle()
 {
   _currentAngle = _poten.getAngle();
-  if ((_currentAngle < 10.) || (_currentAngle > 320.))
+
+  /*****
+  * For safety, we limit the operation area of ​​the potentiometer.
+  *****/
+
+  const double leftAngleLimit = 10.;
+  const double rightAngleLimit = 320.;
+  const double safetyRadius = 10.;
+
+
+  if ((_currentAngle < leftAngleLimit) || (_currentAngle > rightAngleLimit))
   {
-    setRotationSpeed(0.);
+    /*****
+    * We need to stop turning wheel when we in depth zone(in this zone the angle is not stable)
+    *****/
+    const double speedWhenWeInDepthZone = 0.;
+
+    setRotationSpeed(speedWhenWeInDepthZone);
   }
 
   double spd;
-  if ((_needAngle <= 330.) && (_needAngle >= 0.))
+  if ((_needAngle <= rightAngleLimit + safetyRadius) && (_needAngle >= leftAngleLimit - safetyRadius))
   {
+    /*****
+    * This koeficient is good for using PID in turning.
+    *****/
     double minDelta = 30.;
 
     if (abs(_needAngle - _currentAngle) > _turnEps)
@@ -108,6 +133,9 @@ void AngleMotor::standAngle()
       double delta = _currentAngle - _needAngle;
       if (abs(delta) < minDelta)
       {
+        /*****
+        * Calculating speed of turning in PID. Robot can set only positive speed value.
+        *****/
         delta > 0. ? spd = minDelta * _turnKoefPID : spd = -minDelta * _turnKoefPID;
       }
       else
@@ -118,10 +146,12 @@ void AngleMotor::standAngle()
     }
     else
     {
+      /*****
+      * Set 0 speed when we on true angle.
+      *****/
       spd = 0.;
       setRotationSpeed(spd);
       _angleReached = true;
-      //Serial.println("Stopped!");
     }
   }
 

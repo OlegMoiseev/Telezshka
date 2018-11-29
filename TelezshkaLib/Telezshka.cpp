@@ -8,19 +8,19 @@ Telezshka::Telezshka(int pinsForWheel1 [6], int pinsForWheel2 [6], int pinsForWh
 {
   #ifdef TELEZSHKA
     Serial.print("TELEZSHKA init with arrays of wheels and stopArray with pins w1 = [ ");
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 2 * numberOfWheels; i++)
     {
       Serial.print(pinsForWheel1[i]);
       Serial.print(" ");
     }
     Serial.print("], w2 = [ ");
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 2 * numberOfWheels; i++)
     {
       Serial.print(pinsForWheel2[i]);
       Serial.print(" ");
     }
     Serial.print("], w3 = [ ");
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 2 * numberOfWheels; i++)
     {
       Serial.print(pinsForWheel3[i]);
       Serial.print(" ");
@@ -31,20 +31,24 @@ Telezshka::Telezshka(int pinsForWheel1 [6], int pinsForWheel2 [6], int pinsForWh
     Serial.println(_doneTurn);
   #endif
 
+
+  /*****
+  *CRUTCH
+  *****/
   _wheels.at(0) = Wheel(pinsForWheel1);
   _wheels.at(1) = Wheel(pinsForWheel2);
   _wheels.at(2) = Wheel(pinsForWheel3);
   
-
+  const double zero = 0.;
   for (int i = 0; i < numberOfWheels; ++i)
   {
-    _memory[3 * i] = 0.;
-    _memory[3 * i + 1] = 0.;
-    _memory[3 * i + 2] = 0.; 
+    _memory[3 * i] = zero;
+    _memory[3 * i + 1] = zero;
+    _memory[3 * i + 2] = zero; 
 
-    _stopArray[3 * i] = 0.;
-    _stopArray[3 * i + 1] = 0.;
-    _stopArray[3 * i + 2] = 0.; 
+    _stopArray[3 * i] = zero;
+    _stopArray[3 * i + 1] = zero;
+    _stopArray[3 * i + 2] = zero; 
   }
 }
 
@@ -60,11 +64,16 @@ void Telezshka::setGo(double valuesMove [3 * numberOfWheels])
     }
     Serial.println("]");
   #endif
-
+  /*****
+  * Telezska moving(turning/rolling)
+  *****/
   _doneMove = true;
+  /*****
+  * Telezshka turning wheels(turning)
+  *****/
   _doneTurn = true;
 
-  double sum = 0;
+  double sum = 0.;
   
   for(int i = 0; i < 3 * numberOfWheels; ++i)
   {

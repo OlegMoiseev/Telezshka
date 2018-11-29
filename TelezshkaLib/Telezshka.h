@@ -18,8 +18,17 @@ class Telezshka
     Array<Wheel, numberOfWheels> _wheels;
     bool _doneMove;
     bool _doneTurn;
+
+    /*****
+    * Key of stopping. Stop without resetting odometers.
+    *****/
     bool _keyInterruption;
+
     double _stopArray [3 * numberOfWheels];
+
+    /*****
+    * Last setting point.(for correctly work with interruption)
+    *****/
     double _memory [3 * numberOfWheels];
 
   public:

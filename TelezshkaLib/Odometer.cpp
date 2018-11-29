@@ -2,7 +2,8 @@
 
 Odometer::Odometer()
   :
-  _distance(0)
+  _distance(0.),
+  _step(5.)
 {
 	#ifdef ODOMETER
 		Serial.print("ODOMETER init with distance = ");
@@ -22,7 +23,7 @@ void Odometer::resetOdometer()
 
 void Odometer::updateDistance()
 {
-  _distance += 5.;
+  _distance += _step;
 
 	#ifdef ODOMETER
 		Serial.print("ODOMETER called updateDistance and distance = ");
@@ -39,6 +40,11 @@ double Odometer::getDistance()
 	#endif
 		
   return _distance;
+}
+
+double Odometer::getStep()
+{
+	return _step;
 }
 
 Odometer& Odometer::operator= (Odometer &some)

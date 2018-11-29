@@ -44,6 +44,11 @@ void Motor::setRotationSpeed(double spd)
 		Serial.print("MOTOR called setRotationSpeed with speed = ");
 		Serial.println(spd);
 	#endif
+  
+  /*****
+  * We choose max speed and setting direction of rolling/turning.
+  *****/
+  const double maxSpeed = 255.;		
   spd > 0. ? rollBackward() : rollForward();
-  abs(spd) > 255. ? analogWrite(_speedPin, 255.) : analogWrite(_speedPin, abs(spd));
+  abs(spd) > maxSpeed ? analogWrite(_speedPin, maxSpeed) : analogWrite(_speedPin, abs(spd));
 }
